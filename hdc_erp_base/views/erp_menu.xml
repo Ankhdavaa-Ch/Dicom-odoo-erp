@@ -2,16 +2,13 @@
 <odoo>
 
     <!-- ================================================= -->
-    <!-- HDC ERP HOME                                      -->
+    <!-- HDC ERP ROOT APP                                  -->
     <!-- ================================================= -->
 
-    <record id="action_hdc_erp_home"
-            model="ir.actions.act_window">
-
+    <record id="action_hdc_erp_home" model="ir.actions.act_window">
         <field name="name">ХДК ERP</field>
         <field name="res_model">hr.employee</field>
         <field name="view_mode">kanban,list,form</field>
-
     </record>
 
     <menuitem
@@ -22,9 +19,8 @@
         sequence="5"
     />
 
-
     <!-- ================================================= -->
-    <!-- HR CONTAINER                                      -->
+    <!-- ХҮНИЙ НӨӨЦ                                       -->
     <!-- ================================================= -->
 
     <menuitem
@@ -34,9 +30,20 @@
         sequence="10"
     />
 
+    <!-- hdc_hr-ийн одоо байгаа үндсэн цэсүүдийг Employees-ээс
+         ХДК ERP -> Хүний нөөц рүү шилжүүлнэ. -->
+    <record id="hdc_hr.menu_hdc_hr_job_position_list" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_hdc_erp_hr"/>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="hdc_hr.menu_hdc_hr_organization" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_hdc_erp_hr"/>
+        <field name="sequence">20</field>
+    </record>
 
     <!-- ================================================= -->
-    <!-- ATTENDANCE CONTAINER                              -->
+    <!-- ИРЦ                                               -->
     <!-- ================================================= -->
 
     <menuitem
@@ -46,66 +53,31 @@
         sequence="20"
     />
 
-
-    <!-- ================================================= -->
-    <!-- MOVE HDC ATTENDANCE UNDER ERP                     -->
-    <!-- ================================================= -->
-
-    <record id="hdc_attendance.menu_hdc_attendance_root"
-            model="ir.ui.menu">
-
-        <field name="parent_id"
-               ref="menu_hdc_erp_attendance"/>
-
+    <!-- Давхар "Ирц -> Ирц" үүсгэхгүйгээр attendance-ийн
+         дэд цэсүүдийг шууд ХДК ERP -> Ирц доор байрлуулна. -->
+    <record id="hdc_attendance.menu_hdc_attendance_daily" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_hdc_erp_attendance"/>
         <field name="sequence">10</field>
-
     </record>
 
+    <record id="hdc_attendance.menu_hdc_attendance_raw_log" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_hdc_erp_attendance"/>
+        <field name="sequence">20</field>
+    </record>
 
-    <!-- ================================================= -->
-    <!-- FUTURE MODULE PLACEHOLDERS                         -->
-    <!-- ================================================= -->
+    <record id="hdc_attendance.menu_hdc_attendance_pull" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_hdc_erp_attendance"/>
+        <field name="sequence">30</field>
+    </record>
 
-    <menuitem
-        id="menu_hdc_erp_payroll"
-        name="Цалин"
-        parent="menu_hdc_erp_root"
-        sequence="30"
-    />
+    <record id="hdc_attendance.menu_hdc_attendance_device" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_hdc_erp_attendance"/>
+        <field name="sequence">40</field>
+    </record>
 
-    <menuitem
-        id="menu_hdc_erp_leave"
-        name="Чөлөө"
-        parent="menu_hdc_erp_root"
-        sequence="40"
-    />
-
-    <menuitem
-        id="menu_hdc_erp_trip"
-        name="Томилолт"
-        parent="menu_hdc_erp_root"
-        sequence="50"
-    />
-
-    <menuitem
-        id="menu_hdc_erp_document"
-        name="Албан бичиг"
-        parent="menu_hdc_erp_root"
-        sequence="60"
-    />
-
-    <menuitem
-        id="menu_hdc_erp_access"
-        name="Ажилтны эрх"
-        parent="menu_hdc_erp_root"
-        sequence="70"
-    />
-
-    <menuitem
-        id="menu_hdc_erp_report"
-        name="Тайлан"
-        parent="menu_hdc_erp_root"
-        sequence="80"
-    />
+    <!-- Employees дотор үлдсэн хуучин attendance root цэсийг нуух -->
+    <record id="hdc_attendance.menu_hdc_attendance_root" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
 
 </odoo>
