@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ========================================= -->
+    <!-- EMPLOYEES -> ИРЦ                         -->
+    <!-- ========================================= -->
+
+    <menuitem
+        id="menu_hdc_attendance_root"
+        name="Ирц"
+        parent="hr.menu_hr_root"
+        sequence="50"
+    />
+
+
+    <!-- ========================================= -->
+    <!-- ӨДРИЙН ИРЦ                               -->
+    <!-- ========================================= -->
+
+    <menuitem
+        id="menu_hdc_attendance_daily"
+        name="Өдрийн ирц"
+        parent="menu_hdc_attendance_root"
+        action="action_hdc_attendance_daily"
+        sequence="10"
+    />
+
+
+    <!-- ========================================= -->
+    <!-- ИРЦИЙН БҮРТГЭЛ / RAW LOG                 -->
+    <!-- ========================================= -->
+
+    <menuitem
+        id="menu_hdc_attendance_raw_log"
+        name="Ирцийн бүртгэл"
+        parent="menu_hdc_attendance_root"
+        action="action_hdc_attendance_raw_log"
+        sequence="20"
+    />
+
+
+    <!-- ========================================= -->
+    <!-- ТӨХӨӨРӨМЖӨӨС ИРЦ ТАТАХ                   -->
+    <!-- ========================================= -->
+
+    <menuitem
+        id="menu_hdc_attendance_pull"
+        name="Ирц татах"
+        parent="menu_hdc_attendance_root"
+        action="action_hdc_attendance_pull_wizard"
+        sequence="30"
+    />
+
+
+    <!-- ========================================= -->
+    <!-- ТӨХӨӨРӨМЖ                                -->
+    <!-- ========================================= -->
+
+    <menuitem
+        id="menu_hdc_attendance_device"
+        name="Төхөөрөмжүүд"
+        parent="menu_hdc_attendance_root"
+        action="action_hdc_attendance_device"
+        sequence="40"
+    />
+
+</odoo>

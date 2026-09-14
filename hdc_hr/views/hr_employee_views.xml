@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_employee_form_hdc_hr" model="ir.ui.view">
+        <field name="name">hr.employee.form.hdc.hr</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//notebook" position="inside">
+
+                <page string="Ерөнхий мэдээлэл" name="hdc_general_information">
+
+                    <group string="Ерөнхий мэдээлэл" col="4">
+
+                        <group>
+                            <field name="employee_code"/>
+                            <field name="family_name"/>
+                            <field name="birthday"/>
+                            <field name="identification_id"/>
+                            <field name="gender"/>
+                        </group>
+
+                        <group>
+                            <field name="country_id"/>
+                            <field name="country_of_birth"/>
+                            <field name="ethnicity"/>
+                            <field name="place_of_birth"/>
+                            <field name="birth_district"/>
+                        </group>
+
+                        <group>
+                            <field name="marital"/>
+                            <field name="family_member_count"/>
+                            <field name="children"/>
+                        </group>
+
+                        <group>
+                            <field name="mobile_phone"/>
+                            <field name="work_phone"/>
+                            <field name="work_email"/>
+                            <field name="private_email"/>
+                            <field name="emergency_contact"/>
+                            <field name="emergency_phone"/>
+                        </group>
+
+                    </group>
+
+
+                    <separator string="Гэрийн хаяг"/>
+
+                    <group col="4">
+
+                        <group>
+                            <field name="private_country_id"/>
+                            <field name="private_city"/>
+                        </group>
+
+                        <group>
+                            <field name="private_district"/>
+                            <field name="private_khoroo"/>
+                        </group>
+
+                        <group>
+                            <field name="private_street"/>
+                            <field name="private_street2"/>
+                        </group>
+
+                    </group>
+
+                </page>
+
+                <page string="Гэр бүлийн байдал" name="hdc_family">
+                    <field name="family_ids">
+                        <list editable="bottom">
+                            <field name="name"/>
+                            <field name="relationship"/>
+                            <field name="birthday"/>
+                            <field name="organization"/>
+                            <field name="job_title"/>
+                            <field name="phone"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Боловсрол" name="hdc_education">
+                    <field name="education_ids">
+                        <list editable="bottom">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="school_name"/>
+                            <field name="degree"/>
+                            <field name="profession"/>
+                            <field name="country_id"/>
+                            <field name="grade"/>
+                            <field name="diploma_number"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Мэргэшил" name="hdc_qualification">
+                    <field name="qualification_ids">
+                        <list editable="bottom">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="organization"/>
+                            <field name="direction"/>
+                            <field name="certificate_number"/>
+                            <field name="country_id"/>
+                        </list>
+                    </field>
+                </page>
+
+                <page string="Хөдөлмөр эрхлэлт" name="hdc_employment">
+                    <field name="employment_history_ids">
+                        <list editable="bottom">
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="organization"/>
+                            <field name="department"/>
+                            <field name="job_title"/>
+                            <field name="leave_reason"/>
+                            <field name="years_worked"/>
+                            <field name="is_current"/>
+                        </list>
+                    </field>
+                </page>
+
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_employee_department_short_name" model="ir.ui.view">
+    <field name="name">hr.employee.department.short.name</field>
+    <field name="model">hr.employee</field>
+    <field name="inherit_id" ref="hr.view_employee_form"/>
+    <field name="arch" type="xml">
+
+        <xpath expr="//field[@name='department_id']" position="attributes">
+            <attribute name="context">
+                {'hdc_short_name': True}
+            </attribute>
+              <attribute name="domain">
+                [('hdc_unit_type', 'in', ['department', 'division', 'office', 'unit'])]
+            </attribute>
+        </xpath>
+
+    </field>
+</record>
+
+</odoo>

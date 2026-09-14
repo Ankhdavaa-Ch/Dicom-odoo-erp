@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_employee_family,hr.employee.family,model_hr_employee_family,hr.group_hr_user,1,1,1,1
+access_hr_employee_education,hr.employee.education,model_hr_employee_education,hr.group_hr_user,1,1,1,1
+access_hr_employee_qualification,hr.employee.qualification,model_hr_employee_qualification,hr.group_hr_user,1,1,1,1
+access_hr_employee_employment_history,hr.employee.employment.history,model_hr_employee_employment_history,hr.group_hr_user,1,1,1,1
+
+access_hdc_hr_structure,hdc.hr.structure,model_hdc_hr_structure,hr.group_hr_user,1,1,1,1
+access_hdc_hr_structure_node,hdc.hr.structure.node,model_hdc_hr_structure_node,hr.group_hr_user,1,1,1,1

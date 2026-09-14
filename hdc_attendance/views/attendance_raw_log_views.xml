@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- =============================== -->
+    <!-- RAW LOG LIST VIEW              -->
+    <!-- =============================== -->
+
+    <record id="view_hdc_attendance_raw_log_list"
+            model="ir.ui.view">
+
+        <field name="name">hdc.attendance.raw.log.list</field>
+        <field name="model">hdc.attendance.raw.log</field>
+
+        <field name="arch" type="xml">
+
+            <list string="Ирцийн Raw Log"
+                  create="false"
+                  delete="false">
+
+                <field name="received_at"/>
+                <field name="device_id"/>
+                <field name="device_user_id"/>
+                <field name="employee_id"/>
+                <field name="punch_time"/>
+                <field name="punch_state"/>
+                <field name="verify_type"/>
+                <field name="table_name"/>
+                <field name="source_ip"/>
+                <field name="processed"/>
+
+            </list>
+
+        </field>
+
+    </record>
+
+
+    <!-- =============================== -->
+    <!-- RAW LOG FORM VIEW              -->
+    <!-- =============================== -->
+
+    <record id="view_hdc_attendance_raw_log_form"
+            model="ir.ui.view">
+
+        <field name="name">hdc.attendance.raw.log.form</field>
+        <field name="model">hdc.attendance.raw.log</field>
+
+        <field name="arch" type="xml">
+
+            <form string="Raw Attendance Log">
+
+                <header>
+
+                    <button
+                        name="action_match_employee"
+                        string="Ажилтантай холбох"
+                        type="object"
+                        class="btn-primary"
+                        icon="fa-link"
+                        invisible="employee_id != False"
+                    />
+
+                </header>
+
+                <sheet>
+
+                    <group>
+
+                        <group string="Төхөөрөмж">
+
+                            <field name="device_id"/>
+                            <field name="device_serial"/>
+                            <field name="device_user_id"/>
+
+                        </group>
+
+                        <group string="Ажилтан">
+
+                            <field name="employee_id"/>
+
+                        </group>
+
+                    </group>
+
+                    <group>
+
+                        <group string="Ирц">
+
+                            <field name="punch_time"/>
+                            <field name="punch_state"/>
+                            <field name="verify_type"/>
+
+                        </group>
+
+                        <group string="Боловсруулалт">
+
+                            <field name="received_at"/>
+                            <field name="processed"/>
+                            <field name="processing_error"/>
+
+                        </group>
+
+                    </group>
+
+                    <group string="HTTP / ADMS">
+
+                        <field name="table_name"/>
+                        <field name="source_ip"/>
+                        <field name="request_method"/>
+                        <field name="request_path"/>
+
+                    </group>
+
+                    <group>
+
+                        <field name="query_string"/>
+                        <field name="raw_data"/>
+
+                    </group>
+
+                </sheet>
+
+            </form>
+
+        </field>
+
+    </record>
+
+
+    <!-- =============================== -->
+    <!-- ACTION                          -->
+    <!-- =============================== -->
+
+    <record id="action_hdc_attendance_raw_log"
+            model="ir.actions.act_window">
+
+        <field name="name">Ирцийн Raw Log</field>
+        <field name="res_model">hdc.attendance.raw.log</field>
+        <field name="view_mode">list,form</field>
+
+    </record>
+
+</odoo>

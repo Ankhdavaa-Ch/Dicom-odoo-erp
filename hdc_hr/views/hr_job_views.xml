@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_hdc_hr_job_list" model="ir.ui.view">
+        <field name="name">hr.job.hdc.list</field>
+        <field name="model">hr.job</field>
+
+        <field name="arch" type="xml">
+            <list string="Албан тушаал">
+                <field name="name"/>
+                <field name="department_id"/>
+                <field name="company_id"/>
+                <field name="no_of_employee"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_hdc_hr_job_position"
+            model="ir.actions.act_window">
+
+        <field name="name">Албан тушаал</field>
+        <field name="res_model">hr.job</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_hdc_hr_job_list"/>
+
+    </record>
+
+</odoo>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_employee_form_hdc_attendance"
+            model="ir.ui.view">
+
+        <field name="name">hr.employee.form.hdc.attendance</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet/notebook"
+                   position="inside">
+
+                <page string="Ирц">
+
+                    <group>
+                        <field name="attendance_device_user_id"/>
+                        <field name="attendance_device_id"/>
+                    </group>
+
+                </page>
+
+            </xpath>
+
+        </field>
+
+    </record>
+
+</odoo>

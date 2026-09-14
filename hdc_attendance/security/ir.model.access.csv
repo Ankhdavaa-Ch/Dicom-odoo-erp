@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hdc_attendance_device,hdc.attendance.device,model_hdc_attendance_device,,1,1,1,1
+access_hdc_attendance_raw_log,hdc.attendance.raw.log,model_hdc_attendance_raw_log,,1,1,1,1
+access_hdc_attendance_daily,hdc.attendance.daily,model_hdc_attendance_daily,,1,1,1,1
+access_hdc_attendance_pull_wizard,hdc.attendance.pull.wizard,model_hdc_attendance_pull_wizard,base.group_user,1,1,1,1

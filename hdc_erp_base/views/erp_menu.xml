@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ================================================= -->
+    <!-- HDC ERP HOME                                      -->
+    <!-- ================================================= -->
+
+    <record id="action_hdc_erp_home"
+            model="ir.actions.act_window">
+
+        <field name="name">ХДК ERP</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">kanban,list,form</field>
+
+    </record>
+
+    <menuitem
+        id="menu_hdc_erp_root"
+        name="ХДК ERP"
+        action="action_hdc_erp_home"
+        web_icon="hr,static/description/icon.png"
+        sequence="5"
+    />
+
+
+    <!-- ================================================= -->
+    <!-- HR CONTAINER                                      -->
+    <!-- ================================================= -->
+
+    <menuitem
+        id="menu_hdc_erp_hr"
+        name="Хүний нөөц"
+        parent="menu_hdc_erp_root"
+        sequence="10"
+    />
+
+
+    <!-- ================================================= -->
+    <!-- ATTENDANCE CONTAINER                              -->
+    <!-- ================================================= -->
+
+    <menuitem
+        id="menu_hdc_erp_attendance"
+        name="Ирц"
+        parent="menu_hdc_erp_root"
+        sequence="20"
+    />
+
+
+    <!-- ================================================= -->
+    <!-- MOVE HDC ATTENDANCE UNDER ERP                     -->
+    <!-- ================================================= -->
+
+    <record id="hdc_attendance.menu_hdc_attendance_root"
+            model="ir.ui.menu">
+
+        <field name="parent_id"
+               ref="menu_hdc_erp_attendance"/>
+
+        <field name="sequence">10</field>
+
+    </record>
+
+
+    <!-- ================================================= -->
+    <!-- FUTURE MODULE PLACEHOLDERS                         -->
+    <!-- ================================================= -->
+
+    <menuitem
+        id="menu_hdc_erp_payroll"
+        name="Цалин"
+        parent="menu_hdc_erp_root"
+        sequence="30"
+    />
+
+    <menuitem
+        id="menu_hdc_erp_leave"
+        name="Чөлөө"
+        parent="menu_hdc_erp_root"
+        sequence="40"
+    />
+
+    <menuitem
+        id="menu_hdc_erp_trip"
+        name="Томилолт"
+        parent="menu_hdc_erp_root"
+        sequence="50"
+    />
+
+    <menuitem
+        id="menu_hdc_erp_document"
+        name="Албан бичиг"
+        parent="menu_hdc_erp_root"
+        sequence="60"
+    />
+
+    <menuitem
+        id="menu_hdc_erp_access"
+        name="Ажилтны эрх"
+        parent="menu_hdc_erp_root"
+        sequence="70"
+    />
+
+    <menuitem
+        id="menu_hdc_erp_report"
+        name="Тайлан"
+        parent="menu_hdc_erp_root"
+        sequence="80"
+    />
+
+</odoo>

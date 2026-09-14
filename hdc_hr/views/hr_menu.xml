@@ -1,0 +1,7 @@
+<menuitem
+    id="menu_hdc_hr_structure_node"
+    name="Бүтцийн схем"
+    parent="menu_hdc_hr_structure_root"
+    action="action_hdc_hr_structure_node"
+    sequence="20"
+/>
