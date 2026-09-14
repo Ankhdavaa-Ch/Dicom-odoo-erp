@@ -5,16 +5,9 @@
     <!-- HDC ERP ROOT APP                                  -->
     <!-- ================================================= -->
 
-    <record id="action_hdc_erp_home" model="ir.actions.act_window">
-        <field name="name">ХДК ERP</field>
-        <field name="res_model">hr.employee</field>
-        <field name="view_mode">kanban,list,form</field>
-    </record>
-
     <menuitem
         id="menu_hdc_erp_root"
         name="ХДК ERP"
-        action="action_hdc_erp_home"
         web_icon="hr,static/description/icon.png"
         sequence="5"
     />
@@ -30,16 +23,45 @@
         sequence="10"
     />
 
-    <!-- hdc_hr-ийн одоо байгаа үндсэн цэсүүдийг Employees-ээс
-         ХДК ERP -> Хүний нөөц рүү шилжүүлнэ. -->
+    <!-- Ажилтнууд -->
+    <record id="action_hdc_erp_employee" model="ir.actions.act_window">
+        <field name="name">Ажилтнууд</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_hdc_erp_employee"
+        name="Ажилтнууд"
+        parent="menu_hdc_erp_hr"
+        action="action_hdc_erp_employee"
+        sequence="10"
+    />
+
+    <!-- Газар / хэлтэс -->
+    <record id="action_hdc_erp_department" model="ir.actions.act_window">
+        <field name="name">Газар / хэлтэс</field>
+        <field name="res_model">hr.department</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem
+        id="menu_hdc_erp_department"
+        name="Газар / хэлтэс"
+        parent="menu_hdc_erp_hr"
+        action="action_hdc_erp_department"
+        sequence="20"
+    />
+
+    <!-- hdc_hr-ийн цэсүүдийг Employees-ээс ХДК ERP -> Хүний нөөц рүү шилжүүлнэ -->
     <record id="hdc_hr.menu_hdc_hr_job_position_list" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_hr"/>
-        <field name="sequence">10</field>
+        <field name="sequence">30</field>
     </record>
 
     <record id="hdc_hr.menu_hdc_hr_organization" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_hr"/>
-        <field name="sequence">20</field>
+        <field name="sequence">40</field>
     </record>
 
     <!-- ================================================= -->
@@ -53,8 +75,6 @@
         sequence="20"
     />
 
-    <!-- Давхар "Ирц -> Ирц" үүсгэхгүйгээр attendance-ийн
-         дэд цэсүүдийг шууд ХДК ERP -> Ирц доор байрлуулна. -->
     <record id="hdc_attendance.menu_hdc_attendance_daily" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
         <field name="sequence">10</field>
