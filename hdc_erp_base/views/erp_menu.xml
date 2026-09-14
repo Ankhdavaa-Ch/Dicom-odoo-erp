@@ -12,6 +12,11 @@
         sequence="5"
     />
 
+    <!-- Өмнөх хувилбараас DB-д үлдсэн hr.employee action-ийг заавал цэвэрлэнэ -->
+    <record id="menu_hdc_erp_root" model="ir.ui.menu">
+        <field name="action" eval="False"/>
+    </record>
+
     <!-- ================================================= -->
     <!-- ХҮНИЙ НӨӨЦ                                       -->
     <!-- ================================================= -->
@@ -56,11 +61,13 @@
     <!-- hdc_hr-ийн цэсүүдийг Employees-ээс ХДК ERP -> Хүний нөөц рүү шилжүүлнэ -->
     <record id="hdc_hr.menu_hdc_hr_job_position_list" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_hr"/>
+        <field name="active" eval="True"/>
         <field name="sequence">30</field>
     </record>
 
     <record id="hdc_hr.menu_hdc_hr_organization" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_hr"/>
+        <field name="active" eval="True"/>
         <field name="sequence">40</field>
     </record>
 
@@ -77,21 +84,25 @@
 
     <record id="hdc_attendance.menu_hdc_attendance_daily" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
+        <field name="active" eval="True"/>
         <field name="sequence">10</field>
     </record>
 
     <record id="hdc_attendance.menu_hdc_attendance_raw_log" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
+        <field name="active" eval="True"/>
         <field name="sequence">20</field>
     </record>
 
     <record id="hdc_attendance.menu_hdc_attendance_pull" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
+        <field name="active" eval="True"/>
         <field name="sequence">30</field>
     </record>
 
     <record id="hdc_attendance.menu_hdc_attendance_device" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
+        <field name="active" eval="True"/>
         <field name="sequence">40</field>
     </record>
 
