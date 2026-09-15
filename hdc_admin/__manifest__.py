@@ -1,6 +1,6 @@
 {
     'name': 'HDC Admin',
-    'version': '18.0.1.1.0',
+    'version': '18.0.1.2.0',
     'summary': 'ХДК ERP системийн админ удирдлага, дүр ба нэвтрэлтийн лог',
     'category': 'Administration',
     'author': 'HDC',
@@ -16,6 +16,7 @@
     'data': [
         'security/system_roles.xml',
         'security/ir.model.access.csv',
+        'wizard/user_password_wizard_views.xml',
         'views/res_users_views.xml',
         'views/admin_views.xml',
         'views/admin_menu.xml',
