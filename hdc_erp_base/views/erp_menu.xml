@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- HDC ERP root: open Employees so Odoo always has a visible landing action -->
+    <!-- HDC ERP ROOT -->
     <record id="action_hdc_erp_home" model="ir.actions.act_window">
         <field name="name">Ажилтнууд</field>
         <field name="res_model">hr.employee</field>
@@ -16,20 +16,29 @@
         sequence="5"
     />
 
-    <!-- ХҮНИЙ НӨӨЦ -->
-    <!-- Container-д action өгч visibility-г баталгаажуулна. -->
+    <!-- ================================================= -->
+    <!-- ХҮНИЙ НӨӨЦ: top navigation menu                    -->
+    <!-- ================================================= -->
     <menuitem
         id="menu_hdc_erp_hr"
         name="Хүний нөөц"
         parent="menu_hdc_erp_root"
-        action="action_hdc_erp_home"
+        sequence="10"
+    />
+
+    <!-- Odoo top navigation нь 2-р түвшний цэсийг dropdown section гэж үздэг.
+         Тиймээс action-тай menu-үүдийг нэг түвшин доор group-лэнэ. -->
+    <menuitem
+        id="menu_hdc_erp_hr_main"
+        name="Хүний нөөц"
+        parent="menu_hdc_erp_hr"
         sequence="10"
     />
 
     <menuitem
         id="menu_hdc_erp_employee"
         name="Ажилтнууд"
-        parent="menu_hdc_erp_hr"
+        parent="menu_hdc_erp_hr_main"
         action="action_hdc_erp_home"
         sequence="10"
     />
@@ -43,14 +52,13 @@
     <menuitem
         id="menu_hdc_erp_department"
         name="Газар / хэлтэс"
-        parent="menu_hdc_erp_hr"
+        parent="menu_hdc_erp_hr_main"
         action="action_hdc_erp_department"
         sequence="20"
     />
 
-    <!-- hdc_hr-ийн үндсэн цэсүүд -->
     <record id="hdc_hr.menu_hdc_hr_job_position_list" model="ir.ui.menu">
-        <field name="parent_id" ref="menu_hdc_erp_hr"/>
+        <field name="parent_id" ref="menu_hdc_erp_hr_main"/>
         <field name="active" eval="True"/>
         <field name="sequence">30</field>
     </record>
@@ -58,10 +66,12 @@
     <record id="hdc_hr.menu_hdc_hr_organization" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_hr"/>
         <field name="active" eval="True"/>
-        <field name="sequence">40</field>
+        <field name="sequence">20</field>
     </record>
 
-    <!-- ИРЦ -->
+    <!-- ================================================= -->
+    <!-- ИРЦ                                                -->
+    <!-- ================================================= -->
     <menuitem
         id="menu_hdc_erp_attendance"
         name="Ирц"
@@ -93,7 +103,6 @@
         <field name="sequence">40</field>
     </record>
 
-    <!-- Хуучин Employees -> Ирц root-ийг нуух -->
     <record id="hdc_attendance.menu_hdc_attendance_root" model="ir.ui.menu">
         <field name="active" eval="False"/>
     </record>
