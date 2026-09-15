@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_hdc_roles" model="ir.ui.view">
+        <field name="name">res.users.form.hdc.roles</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='login']" position="after">
+                <field name="hdc_role_ids"
+                       string="Системийн дүр"
+                       widget="many2many_tags"
+                       options="{'no_create': True, 'no_create_edit': True}"
+                       groups="base.group_system"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
