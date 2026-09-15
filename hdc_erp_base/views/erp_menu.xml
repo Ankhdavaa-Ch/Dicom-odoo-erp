@@ -1,49 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <!-- ================================================= -->
-    <!-- HDC ERP ROOT APP                                  -->
-    <!-- ================================================= -->
-
-    <menuitem
-        id="menu_hdc_erp_root"
-        name="ХДК ERP"
-        web_icon="hr,static/description/icon.png"
-        sequence="5"
-    />
-
-    <!-- Өмнөх хувилбараас DB-д үлдсэн hr.employee action-ийг заавал цэвэрлэнэ -->
-    <record id="menu_hdc_erp_root" model="ir.ui.menu">
-        <field name="action" eval="False"/>
-    </record>
-
-    <!-- ================================================= -->
-    <!-- ХҮНИЙ НӨӨЦ                                       -->
-    <!-- ================================================= -->
-
-    <menuitem
-        id="menu_hdc_erp_hr"
-        name="Хүний нөөц"
-        parent="menu_hdc_erp_root"
-        sequence="10"
-    />
-
-    <!-- Ажилтнууд -->
-    <record id="action_hdc_erp_employee" model="ir.actions.act_window">
+    <!-- HDC ERP root: open Employees so Odoo always has a visible landing action -->
+    <record id="action_hdc_erp_home" model="ir.actions.act_window">
         <field name="name">Ажилтнууд</field>
         <field name="res_model">hr.employee</field>
         <field name="view_mode">kanban,list,form</field>
     </record>
 
     <menuitem
-        id="menu_hdc_erp_employee"
-        name="Ажилтнууд"
-        parent="menu_hdc_erp_hr"
-        action="action_hdc_erp_employee"
+        id="menu_hdc_erp_root"
+        name="ХДК ERP"
+        action="action_hdc_erp_home"
+        web_icon="hr,static/description/icon.png"
+        sequence="5"
+    />
+
+    <!-- ХҮНИЙ НӨӨЦ -->
+    <!-- Container-д action өгч visibility-г баталгаажуулна. -->
+    <menuitem
+        id="menu_hdc_erp_hr"
+        name="Хүний нөөц"
+        parent="menu_hdc_erp_root"
+        action="action_hdc_erp_home"
         sequence="10"
     />
 
-    <!-- Газар / хэлтэс -->
+    <menuitem
+        id="menu_hdc_erp_employee"
+        name="Ажилтнууд"
+        parent="menu_hdc_erp_hr"
+        action="action_hdc_erp_home"
+        sequence="10"
+    />
+
     <record id="action_hdc_erp_department" model="ir.actions.act_window">
         <field name="name">Газар / хэлтэс</field>
         <field name="res_model">hr.department</field>
@@ -58,7 +48,7 @@
         sequence="20"
     />
 
-    <!-- hdc_hr-ийн цэсүүдийг Employees-ээс ХДК ERP -> Хүний нөөц рүү шилжүүлнэ -->
+    <!-- hdc_hr-ийн үндсэн цэсүүд -->
     <record id="hdc_hr.menu_hdc_hr_job_position_list" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_hr"/>
         <field name="active" eval="True"/>
@@ -71,10 +61,7 @@
         <field name="sequence">40</field>
     </record>
 
-    <!-- ================================================= -->
-    <!-- ИРЦ                                               -->
-    <!-- ================================================= -->
-
+    <!-- ИРЦ -->
     <menuitem
         id="menu_hdc_erp_attendance"
         name="Ирц"
@@ -106,7 +93,7 @@
         <field name="sequence">40</field>
     </record>
 
-    <!-- Employees дотор үлдсэн хуучин attendance root цэсийг нуух -->
+    <!-- Хуучин Employees -> Ирц root-ийг нуух -->
     <record id="hdc_attendance.menu_hdc_attendance_root" model="ir.ui.menu">
         <field name="active" eval="False"/>
     </record>
