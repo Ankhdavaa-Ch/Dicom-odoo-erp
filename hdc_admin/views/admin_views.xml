@@ -4,12 +4,15 @@
         <field name="name">Системийн хэрэглэгч</field>
         <field name="res_model">res.users</field>
         <field name="view_mode">list,form</field>
+        <field name="domain">[('share', '=', False)]</field>
     </record>
 
     <record id="action_hdc_system_groups" model="ir.actions.act_window">
         <field name="name">Системийн дүр</field>
         <field name="res_model">res.groups</field>
         <field name="view_mode">list,form</field>
+        <field name="domain">[('category_id', '=', ref('hdc_admin.module_category_hdc_roles'))]</field>
+        <field name="context">{'create': False, 'delete': False}</field>
     </record>
 
     <record id="view_hdc_login_log_list" model="ir.ui.view">
