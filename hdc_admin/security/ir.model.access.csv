@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_hdc_login_log_system,HDC login log system,model_hdc_login_log,base.group_system,1,0,0,0
+access_hdc_user_password_wizard_system,HDC user password wizard system,model_hdc_user_password_wizard,base.group_system,1,1,1,1
