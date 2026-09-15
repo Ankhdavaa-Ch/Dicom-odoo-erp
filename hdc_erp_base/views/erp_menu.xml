@@ -79,8 +79,11 @@
         <field name="sequence">20</field>
     </record>
 
-    <!-- menu_hdc_attendance_pull нь одоогийн DB-д XML ID байхгүй тул
-         ERP base upgrade-г rollback хийхээс сэргийлж эндээс түр хасав. -->
+    <record id="hdc_attendance.menu_hdc_attendance_pull" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_hdc_erp_attendance"/>
+        <field name="active" eval="True"/>
+        <field name="sequence">30</field>
+    </record>
 
     <record id="hdc_attendance.menu_hdc_attendance_device" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
