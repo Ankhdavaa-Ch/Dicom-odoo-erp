@@ -20,6 +20,7 @@
         <field name="model">res.users</field>
         <field name="arch" type="xml">
             <list string="Системийн хэрэглэгч">
+                <field name="hdc_employee_id" string="Ажилтан"/>
                 <field name="name"/>
                 <field name="login"/>
                 <field name="email"/>
@@ -46,13 +47,16 @@
                     <widget name="web_ribbon" title="Идэвхгүй" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/>
                     <div class="oe_title">
-                        <label for="name"/>
+                        <label for="hdc_employee_id" string="Ажилтан"/>
                         <h1>
-                            <field name="name" placeholder="Овог нэр"/>
+                            <field name="hdc_employee_id"
+                                   placeholder="Ажилтан сонгоно уу"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
                         </h1>
                     </div>
                     <group>
                         <group string="Ерөнхий мэдээлэл">
+                            <field name="name" string="Нэр" readonly="hdc_employee_id"/>
                             <field name="login" string="Нэвтрэх нэр"/>
                             <field name="email" string="И-мэйл"/>
                             <field name="phone" string="Утас"/>
