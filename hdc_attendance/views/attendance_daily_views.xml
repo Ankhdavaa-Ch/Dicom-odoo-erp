@@ -1,179 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!-- ====================================== -->
-    <!-- ӨДРИЙН ИРЦ - LIST VIEW               -->
-    <!-- ====================================== -->
-
     <record id="view_hdc_attendance_daily_list" model="ir.ui.view">
         <field name="name">hdc.attendance.daily.list</field>
         <field name="model">hdc.attendance.daily</field>
-
         <field name="arch" type="xml">
-
-            <list string="Өдрийн ирц"
-                  default_order="attendance_date desc">
-
+            <list string="Өдрийн ирц" default_order="attendance_date desc">
                 <header>
-                    <button
-                        name="action_process_raw_logs"
-                        string="Ирц боловсруулах"
-                        type="object"
-                        class="btn-primary"
-                        icon="fa-refresh"
-                        display="always"
-                    />
+                    <button name="action_process_raw_logs" string="Ирц боловсруулах" type="object" class="btn-primary" icon="fa-refresh" display="always"/>
                 </header>
-
                 <field name="attendance_date"/>
                 <field name="employee_id"/>
-                <field name="department_id"/>
+                <field name="department_name" string="Газар / хэлтэс"/>
                 <field name="job_id"/>
-
                 <field name="planned_check_in"/>
                 <field name="actual_check_in"/>
-
                 <field name="planned_check_out"/>
                 <field name="actual_check_out"/>
-
                 <field name="worked_minutes"/>
                 <field name="late_minutes"/>
                 <field name="early_leave_minutes"/>
                 <field name="overtime_minutes"/>
-
-                <field name="status"
-                       widget="badge"
-                       decoration-success="status == 'present'"
-                       decoration-warning="status == 'late'"
-                       decoration-danger="status == 'absent'"
-                       decoration-info="status == 'early_leave'"/>
-
+                <field name="status" widget="badge" decoration-success="status == 'present'" decoration-warning="status == 'late'" decoration-danger="status == 'absent'" decoration-info="status == 'early_leave'"/>
             </list>
-
         </field>
     </record>
-
-
-    <!-- ====================================== -->
-    <!-- ӨДРИЙН ИРЦ - FORM VIEW               -->
-    <!-- ====================================== -->
 
     <record id="view_hdc_attendance_daily_form" model="ir.ui.view">
         <field name="name">hdc.attendance.daily.form</field>
         <field name="model">hdc.attendance.daily</field>
-
         <field name="arch" type="xml">
-
             <form string="Өдрийн ирц">
-
                 <header>
-
-                    <button
-                        name="action_process_raw_logs"
-                        string="Ирц боловсруулах"
-                        type="object"
-                        class="btn-primary"
-                        icon="fa-refresh"
-                    />
-
+                    <button name="action_process_raw_logs" string="Ирц боловсруулах" type="object" class="btn-primary" icon="fa-refresh"/>
                 </header>
-
                 <sheet>
-
                     <group>
-
                         <group string="Ажилтны мэдээлэл">
-
                             <field name="employee_id"/>
                             <field name="attendance_date"/>
-                            <field name="department_id"/>
+                            <field name="department_name" string="Газар / хэлтэс"/>
                             <field name="job_id"/>
-
                         </group>
-
                         <group string="Ирцийн төлөв">
-
-                            <field name="status"
-                                   widget="badge"/>
-
+                            <field name="status" widget="badge"/>
                             <field name="worked_minutes"/>
                             <field name="late_minutes"/>
                             <field name="early_leave_minutes"/>
                             <field name="overtime_minutes"/>
-
                         </group>
-
                     </group>
-
-
                     <group>
-
                         <group string="Төлөвлөсөн цаг">
-
                             <field name="planned_check_in"/>
                             <field name="planned_check_out"/>
-
                         </group>
-
                         <group string="Бодит цаг">
-
                             <field name="actual_check_in"/>
                             <field name="actual_check_out"/>
-
                         </group>
-
                     </group>
-
-
                     <notebook>
-
                         <page string="Raw Logs">
-
-                            <field name="raw_log_ids"
-                                   readonly="1">
-
-                                <list create="0"
-                                      edit="0"
-                                      delete="0">
-
+                            <field name="raw_log_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
                                     <field name="punch_time"/>
                                     <field name="device_id"/>
                                     <field name="device_user_id"/>
                                     <field name="punch_state"/>
                                     <field name="verify_type"/>
-
                                 </list>
-
                             </field>
-
                         </page>
-
                     </notebook>
-
                 </sheet>
-
             </form>
-
         </field>
     </record>
 
-
-    <!-- ====================================== -->
-    <!-- ӨДРИЙН ИРЦ - ACTION                  -->
-    <!-- ====================================== -->
-
-    <record id="action_hdc_attendance_daily"
-            model="ir.actions.act_window">
-
+    <record id="action_hdc_attendance_daily" model="ir.actions.act_window">
         <field name="name">Өдрийн ирц</field>
-
         <field name="res_model">hdc.attendance.daily</field>
-
         <field name="view_mode">list,form</field>
-
-        <field name="view_id"
-               ref="view_hdc_attendance_daily_list"/>
-
+        <field name="view_id" ref="view_hdc_attendance_daily_list"/>
     </record>
-
 </odoo>
