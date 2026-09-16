@@ -11,6 +11,14 @@ class ResUsers(models.Model):
         help='Системийн хэрэглэгчтэй холбох ажилтан.',
     )
 
+    # Upgrade compatibility only: an older installed view still references this field.
+    # The legacy view is disabled by this module during upgrade.
+    hdc_role_ids = fields.Many2many(
+        'res.groups',
+        string='Хуучин системийн дүр',
+        compute='_compute_legacy_hdc_role_ids',
+    )
+
     hdc_role_id = fields.Many2one(
         'res.groups',
         string='Системийн дүр',
@@ -34,6 +42,11 @@ class ResUsers(models.Model):
         default='none',
         required=True,
     )
+
+    @api.depends('hdc_role_id')
+    def _compute_legacy_hdc_role_ids(self):
+        for user in self:
+            user.hdc_role_ids = user.hdc_role_id
 
     @api.depends_context('uid')
     def _compute_hdc_role_category_id(self):
