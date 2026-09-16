@@ -2,43 +2,73 @@
 <odoo>
     <record id="module_category_hdc_roles" model="ir.module.category">
         <field name="name">ХДК ERP дүр</field>
-        <field name="description">ХДК ERP системийн хэрэглэгчийн дүрүүд</field>
+        <field name="description">ХДК ERP системийн байгууллагын үндсэн дүрүүд</field>
         <field name="sequence">20</field>
     </record>
 
-    <record id="group_hdc_basic_user" model="res.groups">
-        <field name="name">Энгийн хэрэглэгч</field>
+    <!-- System roles describe the employee's organizational role only. -->
+    <record id="group_hdc_ceo" model="res.groups">
+        <field name="name">Гүйцэтгэх захирал</field>
         <field name="category_id" ref="module_category_hdc_roles"/>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
-    <record id="group_hdc_hr_user" model="res.groups">
-        <field name="name">Хүний нөөцийн хэрэглэгч</field>
+    <record id="group_hdc_department_director" model="res.groups">
+        <field name="name">Газрын захирал</field>
         <field name="category_id" ref="module_category_hdc_roles"/>
-        <field name="implied_ids" eval="[(4, ref('group_hdc_basic_user')), (4, ref('hr.group_hr_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
-    <record id="group_hdc_hr_manager" model="res.groups">
-        <field name="name">Хүний нөөцийн админ</field>
+    <record id="group_hdc_section_director" model="res.groups">
+        <field name="name">Хэлтсийн захирал</field>
         <field name="category_id" ref="module_category_hdc_roles"/>
-        <field name="implied_ids" eval="[(4, ref('group_hdc_hr_user')), (4, ref('hr.group_hr_manager'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
-    <record id="group_hdc_attendance_user" model="res.groups">
-        <field name="name">Ирцийн хэрэглэгч</field>
+    <record id="group_hdc_senior_specialist" model="res.groups">
+        <field name="name">Ахлах мэргэжилтэн</field>
         <field name="category_id" ref="module_category_hdc_roles"/>
-        <field name="implied_ids" eval="[(4, ref('group_hdc_basic_user')), (4, ref('hdc_attendance.group_hdc_attendance_user'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
-    <record id="group_hdc_attendance_manager" model="res.groups">
-        <field name="name">Ирцийн админ</field>
+    <record id="group_hdc_specialist" model="res.groups">
+        <field name="name">Мэргэжилтэн</field>
         <field name="category_id" ref="module_category_hdc_roles"/>
-        <field name="implied_ids" eval="[(4, ref('group_hdc_attendance_user')), (4, ref('hdc_attendance.group_hdc_attendance_manager'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_hdc_finance" model="res.groups">
+        <field name="name">Санхүүч</field>
+        <field name="category_id" ref="module_category_hdc_roles"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
     </record>
 
     <record id="group_hdc_system_admin" model="res.groups">
         <field name="name">Системийн админ</field>
         <field name="category_id" ref="module_category_hdc_roles"/>
-        <field name="implied_ids" eval="[(4, ref('group_hdc_hr_manager')), (4, ref('group_hdc_attendance_manager')), (4, ref('base.group_system'))]"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('base.group_system'))]"/>
+    </record>
+
+    <!-- Legacy role groups are retained only for upgrade compatibility.
+         They are moved out of the HDC role category so they are no longer selectable as system roles. -->
+    <record id="group_hdc_basic_user" model="res.groups">
+        <field name="name">[Хуучин] Энгийн хэрэглэгч</field>
+        <field name="category_id" eval="False"/>
+    </record>
+    <record id="group_hdc_hr_user" model="res.groups">
+        <field name="name">[Хуучин] Хүний нөөцийн хэрэглэгч</field>
+        <field name="category_id" eval="False"/>
+    </record>
+    <record id="group_hdc_hr_manager" model="res.groups">
+        <field name="name">[Хуучин] Хүний нөөцийн админ</field>
+        <field name="category_id" eval="False"/>
+    </record>
+    <record id="group_hdc_attendance_user" model="res.groups">
+        <field name="name">[Хуучин] Ирцийн хэрэглэгч</field>
+        <field name="category_id" eval="False"/>
+    </record>
+    <record id="group_hdc_attendance_manager" model="res.groups">
+        <field name="name">[Хуучин] Ирцийн админ</field>
+        <field name="category_id" eval="False"/>
     </record>
 </odoo>
