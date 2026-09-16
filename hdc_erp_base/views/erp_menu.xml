@@ -8,87 +8,60 @@
         <field name="view_mode">kanban,list,form</field>
     </record>
 
-    <menuitem
-        id="menu_hdc_erp_root"
-        name="ХДК ERP"
-        action="action_hdc_erp_home"
-        web_icon="hr,static/description/icon.png"
-        sequence="5"
-    />
+    <menuitem id="menu_hdc_erp_root" name="ХДК ERP" action="action_hdc_erp_home" web_icon="hr,static/description/icon.png" sequence="5"/>
 
     <!-- ХҮНИЙ НӨӨЦ -->
-    <menuitem
-        id="menu_hdc_erp_hr"
-        name="Хүний нөөц"
-        parent="menu_hdc_erp_root"
-        action="action_hdc_erp_home"
-        sequence="10"
-    />
-
-    <menuitem
-        id="menu_hdc_erp_employee"
-        name="Ажилтнууд"
-        parent="menu_hdc_erp_hr"
-        action="action_hdc_erp_home"
-        sequence="10"
-    />
+    <menuitem id="menu_hdc_erp_hr" name="Хүний нөөц" parent="menu_hdc_erp_root" action="action_hdc_erp_home" sequence="10"/>
+    <menuitem id="menu_hdc_erp_employee" name="Ажилтнууд" parent="menu_hdc_erp_hr" action="action_hdc_erp_home" sequence="10"/>
 
     <record id="action_hdc_erp_department" model="ir.actions.act_window">
         <field name="name">Газар / хэлтэс</field>
         <field name="res_model">hr.department</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <menuitem
-        id="menu_hdc_erp_department"
-        name="Газар / хэлтэс"
-        parent="menu_hdc_erp_hr"
-        action="action_hdc_erp_department"
-        sequence="20"
-    />
+    <menuitem id="menu_hdc_erp_department" name="Газар / хэлтэс" parent="menu_hdc_erp_hr" action="action_hdc_erp_department" sequence="20"/>
 
     <record id="hdc_hr.menu_hdc_hr_job_position_list" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_hr"/>
         <field name="active" eval="True"/>
         <field name="sequence">30</field>
     </record>
-
     <record id="hdc_hr.menu_hdc_hr_organization" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_hr"/>
         <field name="active" eval="True"/>
         <field name="sequence">40</field>
     </record>
 
-    <!-- ИРЦ -->
-    <menuitem
-        id="menu_hdc_erp_attendance"
-        name="Ирц"
-        parent="menu_hdc_erp_root"
-        sequence="20"
-    />
+    <!-- ИРЦ: зөвхөн Ирцийн эрхтэй дүрүүдэд харагдана -->
+    <menuitem id="menu_hdc_erp_attendance"
+              name="Ирц"
+              parent="menu_hdc_erp_root"
+              sequence="20"
+              groups="hdc_attendance.group_hdc_attendance_user,hdc_attendance.group_hdc_attendance_manager"/>
 
     <record id="hdc_attendance.menu_hdc_attendance_daily" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
         <field name="active" eval="True"/>
         <field name="sequence">10</field>
+        <field name="groups_id" eval="[(6, 0, [ref('hdc_attendance.group_hdc_attendance_user'), ref('hdc_attendance.group_hdc_attendance_manager')])]"/>
     </record>
-
     <record id="hdc_attendance.menu_hdc_attendance_raw_log" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
         <field name="active" eval="True"/>
         <field name="sequence">20</field>
+        <field name="groups_id" eval="[(6, 0, [ref('hdc_attendance.group_hdc_attendance_user'), ref('hdc_attendance.group_hdc_attendance_manager')])]"/>
     </record>
-
     <record id="hdc_attendance.menu_hdc_attendance_pull" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
         <field name="active" eval="True"/>
         <field name="sequence">30</field>
+        <field name="groups_id" eval="[(6, 0, [ref('hdc_attendance.group_hdc_attendance_manager')])]"/>
     </record>
-
     <record id="hdc_attendance.menu_hdc_attendance_device" model="ir.ui.menu">
         <field name="parent_id" ref="menu_hdc_erp_attendance"/>
         <field name="active" eval="True"/>
         <field name="sequence">40</field>
+        <field name="groups_id" eval="[(6, 0, [ref('hdc_attendance.group_hdc_attendance_manager')])]"/>
     </record>
 
     <record id="hdc_attendance.menu_hdc_attendance_root" model="ir.ui.menu">
