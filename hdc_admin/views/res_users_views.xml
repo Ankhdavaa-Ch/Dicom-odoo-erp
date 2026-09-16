@@ -1,30 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_users_form_hdc_roles" model="ir.ui.view">
-        <field name="name">res.users.form.hdc.roles</field>
-        <field name="model">res.users</field>
-        <field name="inherit_id" ref="base.view_users_form"/>
-        <field name="arch" type="xml">
-            <xpath expr="//field[@name='login']" position="after">
-                <field name="hdc_role_ids"
-                       string="Системийн дүр"
-                       widget="many2many_tags"
-                       options="{'no_create': True, 'no_create_edit': True}"
-                       groups="base.group_system"/>
-            </xpath>
-        </field>
-    </record>
-
     <record id="view_hdc_system_users_list" model="ir.ui.view">
         <field name="name">res.users.hdc.system.list</field>
         <field name="model">res.users</field>
         <field name="arch" type="xml">
             <list string="Системийн хэрэглэгч">
                 <field name="hdc_employee_id" string="Ажилтан"/>
-                <field name="name"/>
                 <field name="login"/>
-                <field name="email"/>
-                <field name="hdc_role_ids" string="Системийн дүр" widget="many2many_tags"/>
+                <field name="hdc_role_id" string="Системийн дүр"/>
+                <field name="hdc_hr_access" string="Хүний нөөц"/>
+                <field name="hdc_attendance_access" string="Ирц"/>
                 <field name="active"/>
             </list>
         </field>
@@ -46,6 +31,8 @@
                 <sheet>
                     <widget name="web_ribbon" title="Идэвхгүй" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/>
+                    <field name="hdc_role_category_id" invisible="1"/>
+
                     <div class="oe_title">
                         <label for="hdc_employee_id" string="Ажилтан"/>
                         <h1>
@@ -54,6 +41,7 @@
                                    options="{'no_create': True, 'no_create_edit': True}"/>
                         </h1>
                     </div>
+
                     <group>
                         <group string="Ерөнхий мэдээлэл">
                             <field name="name" string="Нэр" readonly="hdc_employee_id"/>
@@ -63,17 +51,33 @@
                             <field name="company_id" string="Компани" groups="base.group_multi_company"/>
                             <field name="active" string="Идэвхтэй"/>
                         </group>
-                        <group string="Системийн эрх">
-                            <field name="hdc_role_ids"
-                                   string="Системийн дүр"
-                                   widget="many2many_tags"
+
+                        <group string="Системийн дүр">
+                            <field name="hdc_role_id"
+                                   string="Үндсэн дүр"
                                    options="{'no_create': True, 'no_create_edit': True}"/>
                         </group>
                     </group>
+
+                    <separator string="Модулийн эрх"/>
+                    <group>
+                        <group string="Үндсэн модулиуд">
+                            <field name="hdc_hr_access" string="Хүний нөөц"/>
+                            <field name="hdc_attendance_access" string="Ирц"/>
+                        </group>
+                        <group string="Эрхийн түвшин">
+                            <div class="text-muted">
+                                Эрхгүй — модульд нэвтрэхгүй<br/>
+                                Харах — мэдээлэл харах<br/>
+                                Ажиллах — тухайн модуль дээр ажиллах<br/>
+                                Удирдах — модулийг бүрэн удирдах
+                            </div>
+                        </group>
+                    </group>
+
                     <separator string="Нууц үгийн удирдлага"/>
                     <div class="text-muted">
-                        Системийн админ дээрх “Нууц үг тохируулах” товчоор хэрэглэгчийн анхны болон шинэ нууц үгийг тохируулна.
-                        Нууц үг ил текстээр хадгалагдахгүй, Odoo-ийн стандарт хамгаалалт ашиглагдана.
+                        Системийн админ “Нууц үг тохируулах” товчоор хэрэглэгчийн анхны болон шинэ нууц үгийг тохируулна.
                     </div>
                 </sheet>
             </form>
