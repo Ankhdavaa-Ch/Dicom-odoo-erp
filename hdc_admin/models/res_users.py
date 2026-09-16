@@ -12,7 +12,6 @@ class ResUsers(models.Model):
     )
 
     # Upgrade compatibility only: an older installed view still references this field.
-    # The legacy view is disabled by this module during upgrade.
     hdc_role_ids = fields.Many2many(
         'res.groups',
         string='Хуучин системийн дүр',
@@ -23,24 +22,11 @@ class ResUsers(models.Model):
         'res.groups',
         string='Системийн дүр',
         domain="[('category_id', '=', hdc_role_category_id)]",
-        help='Ажилтны байгууллагын үндсэн системийн дүр. Нэг хэрэглэгч нэг үндсэн дүртэй байна.',
+        help='Хэрэглэгчид олгосон үндсэн системийн дүр. Модулийн эрхүүд тухайн дүрээс автоматаар өвлөгдөнө.',
     )
     hdc_role_category_id = fields.Many2one(
         'ir.module.category',
         compute='_compute_hdc_role_category_id',
-    )
-
-    hdc_hr_access = fields.Selection(
-        [('none', 'Эрхгүй'), ('read', 'Харах'), ('work', 'Ажиллах'), ('manage', 'Удирдах')],
-        string='Хүний нөөц',
-        default='none',
-        required=True,
-    )
-    hdc_attendance_access = fields.Selection(
-        [('none', 'Эрхгүй'), ('read', 'Харах'), ('work', 'Ажиллах'), ('manage', 'Удирдах')],
-        string='Ирц',
-        default='none',
-        required=True,
     )
 
     @api.depends('hdc_role_id')
@@ -71,45 +57,13 @@ class ResUsers(models.Model):
                 groups |= group
         return groups
 
-    def _hdc_module_groups(self):
-        xmlids = [
-            'hr.group_hr_user',
-            'hr.group_hr_manager',
-            'hdc_attendance.group_hdc_attendance_user',
-            'hdc_attendance.group_hdc_attendance_manager',
-        ]
-        groups = self.env['res.groups']
-        for xmlid in xmlids:
-            group = self.env.ref(xmlid, raise_if_not_found=False)
-            if group:
-                groups |= group
-        return groups
-
-    def _apply_hdc_security(self):
+    def _apply_hdc_role(self):
         system_roles = self._hdc_system_role_groups()
-        module_groups = self._hdc_module_groups()
-        hr_user = self.env.ref('hr.group_hr_user', raise_if_not_found=False)
-        hr_manager = self.env.ref('hr.group_hr_manager', raise_if_not_found=False)
-        attendance_user = self.env.ref('hdc_attendance.group_hdc_attendance_user', raise_if_not_found=False)
-        attendance_manager = self.env.ref('hdc_attendance.group_hdc_attendance_manager', raise_if_not_found=False)
-
         for user in self:
-            groups = user.groups_id - system_roles - module_groups
+            groups = user.groups_id - system_roles
             groups |= self.env.ref('base.group_user')
-
             if user.hdc_role_id:
                 groups |= user.hdc_role_id
-
-            if user.hdc_hr_access in ('read', 'work') and hr_user:
-                groups |= hr_user
-            elif user.hdc_hr_access == 'manage' and hr_manager:
-                groups |= hr_manager
-
-            if user.hdc_attendance_access in ('read', 'work') and attendance_user:
-                groups |= attendance_user
-            elif user.hdc_attendance_access == 'manage' and attendance_manager:
-                groups |= attendance_manager
-
             user.with_context(skip_hdc_security=True).groups_id = [(6, 0, groups.ids)]
 
     @api.onchange('hdc_employee_id')
@@ -128,7 +82,7 @@ class ResUsers(models.Model):
         for user in users:
             if user.hdc_employee_id and user.hdc_employee_id.user_id != user:
                 user.hdc_employee_id.sudo().user_id = user.id
-        users._apply_hdc_security()
+        users._apply_hdc_role()
         return users
 
     def write(self, vals):
@@ -146,8 +100,7 @@ class ResUsers(models.Model):
                 if user.hdc_employee_id and user.hdc_employee_id.user_id != user:
                     user.hdc_employee_id.sudo().user_id = user.id
 
-        security_fields = {'hdc_role_id', 'hdc_hr_access', 'hdc_attendance_access'}
-        if security_fields.intersection(vals):
-            self._apply_hdc_security()
+        if 'hdc_role_id' in vals:
+            self._apply_hdc_role()
 
         return result
