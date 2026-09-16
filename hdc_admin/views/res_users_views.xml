@@ -11,10 +11,8 @@
         <field name="arch" type="xml">
             <list string="Системийн хэрэглэгч">
                 <field name="hdc_employee_id" string="Ажилтан"/>
-                <field name="login"/>
+                <field name="login" string="Нэвтрэх нэр"/>
                 <field name="hdc_role_id" string="Системийн дүр"/>
-                <field name="hdc_hr_access" string="Хүний нөөц"/>
-                <field name="hdc_attendance_access" string="Ирц"/>
                 <field name="active"/>
             </list>
         </field>
@@ -56,26 +54,12 @@
                             <field name="company_id" string="Компани" groups="base.group_multi_company"/>
                             <field name="active" string="Идэвхтэй"/>
                         </group>
-
-                        <group string="Системийн дүр">
+                        <group string="Системийн эрх">
                             <field name="hdc_role_id"
-                                   string="Үндсэн дүр"
+                                   string="Системийн дүр"
                                    options="{'no_create': True, 'no_create_edit': True}"/>
-                        </group>
-                    </group>
-
-                    <separator string="Модулийн эрх"/>
-                    <group>
-                        <group string="Үндсэн модулиуд">
-                            <field name="hdc_hr_access" string="Хүний нөөц"/>
-                            <field name="hdc_attendance_access" string="Ирц"/>
-                        </group>
-                        <group string="Эрхийн түвшин">
                             <div class="text-muted">
-                                Эрхгүй — модульд нэвтрэхгүй<br/>
-                                Харах — мэдээлэл харах<br/>
-                                Ажиллах — тухайн модуль дээр ажиллах<br/>
-                                Удирдах — модулийг бүрэн удирдах
+                                Модулийн эрхүүд сонгосон системийн дүрээс автоматаар өвлөгдөнө.
                             </div>
                         </group>
                     </group>
