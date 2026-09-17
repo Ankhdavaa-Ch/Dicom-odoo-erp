@@ -37,14 +37,7 @@ class HdcEmployeeRequest(models.Model):
 
     name = fields.Char(string='Хүсэлтийн дугаар', default='Шинэ', readonly=True, copy=False, tracking=True)
     request_type = fields.Selection(REQUEST_TYPES, string='Хүсэлтийн төрөл', required=True, tracking=True)
-    employee_id = fields.Many2one(
-        'hr.employee',
-        string='Ажилтан',
-        required=True,
-        readonly=True,
-        default=_default_employee_id,
-        tracking=True,
-    )
+    employee_id = fields.Many2one('hr.employee', string='Ажилтан', required=True, readonly=True, default=_default_employee_id, tracking=True)
     department_id = fields.Many2one('hr.department', string='Нэгж', related='employee_id.department_id', store=True, readonly=True)
     approver_user_id = fields.Many2one('res.users', string='Нэгжийн удирдлага', readonly=True, tracking=True)
     date_from = fields.Datetime(string='Эхлэх огноо, цаг', required=True, tracking=True)
@@ -93,19 +86,46 @@ class HdcEmployeeRequest(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code('hdc.employee.request') or 'Шинэ'
         return super().create(vals_list)
 
+    def _employee_user(self):
+        self.ensure_one()
+        return self.employee_id.user_id
+
+    def _notify_employee(self, summary, note):
+        for rec in self:
+            employee_user = rec._employee_user()
+            if not employee_user:
+                continue
+            rec.activity_schedule(
+                'mail.mail_activity_data_todo',
+                user_id=employee_user.id,
+                summary=summary,
+                note=note,
+            )
+
     def action_submit(self):
         for rec in self:
             if rec.employee_id.user_id != self.env.user:
                 raise UserError(_('Зөвхөн өөрийн хүсэлтийг илгээх боломжтой.'))
+            if rec.state not in ('draft', 'rejected'):
+                raise UserError(_('Зөвхөн ноорог эсвэл буцаасан хүсэлтийг илгээх боломжтой.'))
             approver = rec.department_id.hdc_approver_user_id
             if not approver:
                 raise UserError(_('Таны нэгж дээр "Нэгжийн удирдлага" тохируулаагүй байна.'))
             if approver == self.env.user:
                 raise UserError(_('Өөрийн хүсэлтийг өөрөө батлах боломжгүй. Дээд шатны батлагч тохируулна уу.'))
+
+            # Close the employee's previous decision notification before resubmitting.
+            employee_user = rec._employee_user()
+            if employee_user:
+                rec.activity_ids.filtered(lambda a: a.user_id == employee_user).action_done()
+
             rec.write({
                 'state': 'submitted',
                 'approver_user_id': approver.id,
                 'submitted_at': fields.Datetime.now(),
+                'approved_at': False,
+                'rejected_at': False,
+                'decision_note': False,
             })
             rec.activity_schedule(
                 'mail.mail_activity_data_todo',
@@ -122,7 +142,10 @@ class HdcEmployeeRequest(models.Model):
 
     def _close_approver_activities(self):
         for rec in self:
-            activities = rec.activity_ids.filtered(lambda a: a.user_id == rec.approver_user_id and a.activity_type_id == self.env.ref('mail.mail_activity_data_todo'))
+            activities = rec.activity_ids.filtered(
+                lambda a: a.user_id == rec.approver_user_id
+                and a.activity_type_id == self.env.ref('mail.mail_activity_data_todo')
+            )
             activities.action_done()
 
     def action_approve(self):
@@ -133,6 +156,10 @@ class HdcEmployeeRequest(models.Model):
             rec.write({'state': 'approved', 'approved_at': fields.Datetime.now()})
             rec._close_approver_activities()
             rec.message_post(body=_('Хүсэлт батлагдлаа.'))
+            rec._notify_employee(
+                _('Таны хүсэлт батлагдлаа'),
+                _('%s хүсэлт тань нэгжийн удирдлагаар батлагдлаа.') % dict(REQUEST_TYPES).get(rec.request_type),
+            )
 
     def action_reject(self):
         self._check_approver()
@@ -144,6 +171,26 @@ class HdcEmployeeRequest(models.Model):
             rec.write({'state': 'rejected', 'rejected_at': fields.Datetime.now()})
             rec._close_approver_activities()
             rec.message_post(body=_('Хүсэлт буцаагдлаа. Шалтгаан: %s') % rec.decision_note)
+            rec._notify_employee(
+                _('Таны хүсэлт буцаагдлаа'),
+                _('%s хүсэлт буцаагдлаа. Шалтгаан: %s') % (dict(REQUEST_TYPES).get(rec.request_type), rec.decision_note),
+            )
+
+    def action_reset_to_draft(self):
+        for rec in self:
+            if rec.employee_id.user_id != self.env.user:
+                raise UserError(_('Зөвхөн өөрийн хүсэлтийг засварлах боломжтой.'))
+            if rec.state != 'rejected':
+                raise UserError(_('Зөвхөн буцаасан хүсэлтийг засварлаж болно.'))
+            employee_user = rec._employee_user()
+            if employee_user:
+                rec.activity_ids.filtered(lambda a: a.user_id == employee_user).action_done()
+            rec.write({
+                'state': 'draft',
+                'approver_user_id': False,
+                'decision_note': False,
+            })
+            rec.message_post(body=_('Хүсэлтийг засварлахаар ноорог төлөвт шилжүүллээ.'))
 
     def action_cancel(self):
         for rec in self:
