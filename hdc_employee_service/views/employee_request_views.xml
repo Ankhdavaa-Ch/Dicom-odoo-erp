@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hdc_employee_request_list" model="ir.ui.view">
+        <field name="name">hdc.employee.request.list</field>
+        <field name="model">hdc.employee.request</field>
+        <field name="arch" type="xml">
+            <list string="Хүсэлт, санал" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-info="state == 'submitted'">
+                <field name="name"/><field name="employee_id"/><field name="request_type"/>
+                <field name="date_from"/><field name="date_to"/><field name="duration_display"/>
+                <field name="approver_user_id"/><field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hdc_employee_request_form" model="ir.ui.view">
+        <field name="name">hdc.employee.request.form</field>
+        <field name="model">hdc.employee.request</field>
+        <field name="arch" type="xml">
+            <form string="Хүсэлт">
+                <header>
+                    <button name="action_submit" type="object" string="Хүсэлт илгээх" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_approve" type="object" string="Батлах" class="btn-success" invisible="state != 'submitted' or approver_user_id != uid"/>
+                    <button name="action_reject" type="object" string="Буцаах" class="btn-danger" invisible="state != 'submitted' or approver_user_id != uid"/>
+                    <button name="action_cancel" type="object" string="Цуцлах" invisible="state not in ['draft', 'submitted']"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,rejected,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="employee_id" readonly="1"/>
+                            <field name="department_id" readonly="1"/>
+                            <field name="request_type" readonly="state != 'draft'"/>
+                            <field name="date_from" readonly="state != 'draft'"/>
+                            <field name="date_to" readonly="state != 'draft'"/>
+                            <field name="duration_display" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="approver_user_id" readonly="1"/>
+                            <field name="submitted_at" readonly="1"/>
+                            <field name="approved_at" readonly="1" invisible="state != 'approved'"/>
+                            <field name="rejected_at" readonly="1" invisible="state != 'rejected'"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="reason" readonly="state != 'draft'" placeholder="Хүсэлтийн шалтгаан, тайлбарыг бичнэ үү..."/>
+                        <field name="attachment_ids" widget="many2many_binary" readonly="state != 'draft'"/>
+                        <field name="decision_note" placeholder="Буцаах бол шалтгааныг энд бичнэ үү..." invisible="state not in ['submitted', 'rejected']"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hdc_my_requests" model="ir.actions.act_window">
+        <field name="name">Миний хүсэлтүүд</field>
+        <field name="res_model">hdc.employee.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('employee_id.user_id', '=', uid)]</field>
+        <field name="context">{'default_employee_id': False}</field>
+    </record>
+
+    <record id="action_hdc_requests_to_approve" model="ir.actions.act_window">
+        <field name="name">Батлах хүсэлтүүд</field>
+        <field name="res_model">hdc.employee.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('approver_user_id', '=', uid), ('state', '=', 'submitted')]</field>
+        <field name="context">{'create': False}</field>
+    </record>
+</odoo>
