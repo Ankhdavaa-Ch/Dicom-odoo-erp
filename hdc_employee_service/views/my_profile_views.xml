@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hdc_my_profile_form" model="ir.ui.view">
+        <field name="name">hr.employee.hdc.my.profile.form</field>
+        <field name="model">hr.employee</field>
+        <field name="arch" type="xml">
+            <form string="Миний анкет" create="0" edit="0" delete="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group col="4">
+                        <group string="Ажлын мэдээлэл">
+                            <field name="employee_code" readonly="1"/>
+                            <field name="department_id" readonly="1"/>
+                            <field name="job_id" readonly="1"/>
+                            <field name="work_phone" readonly="1"/>
+                            <field name="work_email" readonly="1"/>
+                        </group>
+                        <group string="Хувийн мэдээлэл">
+                            <field name="family_name" readonly="1"/>
+                            <field name="birthday" readonly="1"/>
+                            <field name="identification_id" readonly="1"/>
+                            <field name="gender" readonly="1"/>
+                            <field name="country_id" readonly="1"/>
+                            <field name="country_of_birth" readonly="1"/>
+                            <field name="ethnicity" readonly="1"/>
+                            <field name="place_of_birth" readonly="1"/>
+                            <field name="birth_district" readonly="1"/>
+                        </group>
+                        <group string="Гэр бүлийн мэдээлэл">
+                            <field name="marital" readonly="1"/>
+                            <field name="family_member_count" readonly="1"/>
+                            <field name="children" readonly="1"/>
+                            <field name="mobile_phone" readonly="1"/>
+                            <field name="private_email" readonly="1"/>
+                            <field name="emergency_contact" readonly="1"/>
+                            <field name="emergency_phone" readonly="1"/>
+                        </group>
+                        <group string="Гэрийн хаяг">
+                            <field name="private_country_id" readonly="1"/>
+                            <field name="private_city" readonly="1"/>
+                            <field name="private_district" readonly="1"/>
+                            <field name="private_khoroo" readonly="1"/>
+                            <field name="private_street" readonly="1"/>
+                            <field name="private_street2" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Гэр бүлийн байдал">
+                            <field name="family_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="name"/><field name="relationship"/><field name="birthday"/>
+                                    <field name="organization"/><field name="job_title"/><field name="phone"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Боловсрол">
+                            <field name="education_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="date_from"/><field name="date_to"/><field name="school_name"/>
+                                    <field name="degree"/><field name="profession"/><field name="country_id"/>
+                                    <field name="grade"/><field name="diploma_number"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Мэргэшил">
+                            <field name="qualification_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="date_from"/><field name="date_to"/><field name="organization"/>
+                                    <field name="direction"/><field name="certificate_number"/><field name="country_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Хөдөлмөр эрхлэлт">
+                            <field name="employment_history_ids" readonly="1">
+                                <list create="0" edit="0" delete="0">
+                                    <field name="date_from"/><field name="date_to"/><field name="organization"/>
+                                    <field name="department"/><field name="job_title"/><field name="leave_reason"/>
+                                    <field name="years_worked"/><field name="is_current"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hdc_my_profile" model="ir.actions.act_window">
+        <field name="name">Миний анкет</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_hdc_my_profile_form"/>
+        <field name="domain">[('user_id', '=', uid)]</field>
+        <field name="context">{'create': False, 'edit': False, 'delete': False}</field>
+    </record>
+</odoo>
