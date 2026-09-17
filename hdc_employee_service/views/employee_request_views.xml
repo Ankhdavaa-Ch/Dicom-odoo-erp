@@ -19,9 +19,10 @@
             <form string="Хүсэлт">
                 <header>
                     <button name="action_submit" type="object" string="Хүсэлт илгээх" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_reset_to_draft" type="object" string="Засварлах" class="btn-primary" invisible="state != 'rejected' or employee_id.user_id != uid"/>
                     <button name="action_approve" type="object" string="Батлах" class="btn-success" invisible="state != 'submitted' or approver_user_id != uid"/>
                     <button name="action_reject" type="object" string="Буцаах" class="btn-danger" invisible="state != 'submitted' or approver_user_id != uid"/>
-                    <button name="action_cancel" type="object" string="Цуцлах" invisible="state not in ['draft', 'submitted']"/>
+                    <button name="action_cancel" type="object" string="Цуцлах" invisible="state not in ['draft', 'submitted'] or employee_id.user_id != uid"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,rejected,cancelled"/>
                 </header>
                 <sheet>
@@ -45,8 +46,11 @@
                     <group>
                         <field name="reason" readonly="state != 'draft'" placeholder="Хүсэлтийн шалтгаан, тайлбарыг бичнэ үү..."/>
                         <field name="attachment_ids" widget="many2many_binary" readonly="state != 'draft'"/>
-                        <field name="decision_note" placeholder="Буцаах бол шалтгааныг энд бичнэ үү..." invisible="state not in ['submitted', 'rejected']"/>
+                        <field name="decision_note" placeholder="Буцаах бол шалтгааныг энд бичнэ үү..." readonly="state != 'submitted'" invisible="state not in ['submitted', 'rejected']"/>
                     </group>
+                    <div class="alert alert-warning" role="alert" invisible="state != 'rejected'">
+                        Энэ хүсэлтийг удирдлага буцаасан байна. "Засварлах" товчийг дарж мэдээллээ өөрчлөөд дахин илгээнэ үү.
+                    </div>
                 </sheet>
                 <chatter/>
             </form>
