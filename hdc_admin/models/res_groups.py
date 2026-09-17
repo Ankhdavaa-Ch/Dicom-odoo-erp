@@ -12,18 +12,9 @@ ACCESS_LEVELS = [
 class ResGroups(models.Model):
     _inherit = 'res.groups'
 
-    hdc_hr_access = fields.Selection(
-        ACCESS_LEVELS,
-        string='Хүний нөөц',
-        default='none',
-        required=True,
-    )
-    hdc_attendance_access = fields.Selection(
-        ACCESS_LEVELS,
-        string='Ирц',
-        default='none',
-        required=True,
-    )
+    hdc_hr_access = fields.Selection(ACCESS_LEVELS, string='Хүний нөөц', default='none', required=True)
+    hdc_attendance_access = fields.Selection(ACCESS_LEVELS, string='Ирц', default='none', required=True)
+    hdc_employee_service_access = fields.Selection(ACCESS_LEVELS, string='Ажилтны үйлчилгээ', default='none', required=True)
 
     def _is_hdc_system_role(self):
         category = self.env.ref('hdc_admin.module_category_hdc_roles', raise_if_not_found=False)
@@ -36,6 +27,7 @@ class ResGroups(models.Model):
             'hr.group_hr_manager',
             'hdc_attendance.group_hdc_attendance_user',
             'hdc_attendance.group_hdc_attendance_manager',
+            'hdc_employee_service.group_hdc_employee_service_user',
         ]:
             group = self.env.ref(xmlid, raise_if_not_found=False)
             if group:
@@ -47,6 +39,7 @@ class ResGroups(models.Model):
         hr_manager = self.env.ref('hr.group_hr_manager', raise_if_not_found=False)
         attendance_user = self.env.ref('hdc_attendance.group_hdc_attendance_user', raise_if_not_found=False)
         attendance_manager = self.env.ref('hdc_attendance.group_hdc_attendance_manager', raise_if_not_found=False)
+        employee_service_user = self.env.ref('hdc_employee_service.group_hdc_employee_service_user', raise_if_not_found=False)
         module_groups = self._hdc_module_groups()
 
         for role in self:
@@ -65,6 +58,9 @@ class ResGroups(models.Model):
             elif role.hdc_attendance_access == 'manage' and attendance_manager:
                 implied |= attendance_manager
 
+            if role.hdc_employee_service_access != 'none' and employee_service_user:
+                implied |= employee_service_user
+
             role.with_context(skip_hdc_role_sync=True).implied_ids = [(6, 0, implied.ids)]
 
     @api.model_create_multi
@@ -75,6 +71,7 @@ class ResGroups(models.Model):
 
     def write(self, vals):
         result = super().write(vals)
-        if not self.env.context.get('skip_hdc_role_sync') and {'hdc_hr_access', 'hdc_attendance_access'}.intersection(vals):
+        security_fields = {'hdc_hr_access', 'hdc_attendance_access', 'hdc_employee_service_access'}
+        if not self.env.context.get('skip_hdc_role_sync') and security_fields.intersection(vals):
             self._sync_hdc_module_permissions()
         return result
