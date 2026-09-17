@@ -33,12 +33,17 @@
                                     <t t-if="!day.outside">
                                         <div class="hdc_planned">◷ <t t-esc="day.planned"/></div>
                                         <div class="hdc_day_details">
-                                            <div t-if="day.statusLabel"/>
                                             <div t-if="day.status !== 'empty'" t-att-class="day.status === 'late' || day.status === 'late_early' ? 'text-danger' : 'text-primary'">
                                                 <t t-esc="statusLabel(day.status)"/>
                                             </div>
                                             <div t-if="day.late !== '00:00'" class="text-danger">Хоцорсон <span t-esc="day.late"/></div>
                                             <div t-if="day.early !== '00:00'" class="text-primary">Эрт явсан <span t-esc="day.early"/></div>
+                                            <t t-foreach="day.requests || []" t-as="request" t-key="request.id + '-' + day.date">
+                                                <div class="hdc_request_entry">
+                                                    <strong t-esc="request.label"/>
+                                                    <span t-esc="request.time"/>
+                                                </div>
+                                            </t>
                                         </div>
                                         <div class="hdc_actual" t-if="day.check_in || day.check_out">
                                             <t t-esc="day.check_in || '-'"/> - <t t-esc="day.check_out || '-'"/>
@@ -56,6 +61,13 @@
                     <div class="hdc_summary_row"><span>Ажилласан цаг</span><strong t-esc="state.data.totals.worked"/></div>
                     <div class="hdc_summary_row"><span>Хоцорсон</span><strong t-esc="state.data.totals.late"/></div>
                     <div class="hdc_summary_row"><span>Эрт явсан</span><strong t-esc="state.data.totals.early"/></div>
+                    <div class="hdc_summary_row"><span>Гадуур ажилласан</span><strong t-esc="state.data.totals.outside_work"/></div>
+                    <div class="hdc_summary_row"><span>Чөлөө</span><strong t-esc="state.data.totals.leave"/></div>
+                    <div class="hdc_summary_row"><span>Ирц нөхөн бүртгүүлсэн</span><strong t-esc="state.data.totals.attendance_correction"/></div>
+                    <div class="hdc_summary_row"><span>Ээлжийн амралт</span><strong t-esc="state.data.totals.annual_leave"/></div>
+                    <div class="hdc_summary_row"><span>Өвчтэй</span><strong t-esc="state.data.totals.sick"/></div>
+                    <div class="hdc_summary_row"><span>Сургалтын чөлөө</span><strong t-esc="state.data.totals.training_leave"/></div>
+                    <div class="hdc_summary_row"><span>Илүү цагийн хүсэлт</span><strong t-esc="state.data.totals.request_overtime"/></div>
                     <div class="hdc_summary_row"><span>Илүү ажилласан</span><strong t-esc="state.data.totals.overtime"/></div>
                     <div class="hdc_news_title">Мэдээ мэдээлэл</div>
                     <div class="hdc_empty_news">Одоогоор мэдээ мэдээлэл байхгүй байна.</div>
