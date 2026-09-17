@@ -11,10 +11,17 @@
               sequence="30"
               groups="hdc_employee_service.group_hdc_employee_service_user"/>
 
+    <menuitem id="menu_hdc_my_profile"
+              name="Миний анкет"
+              parent="menu_hdc_employee_service_root"
+              action="action_hdc_my_profile"
+              sequence="10"
+              groups="hdc_employee_service.group_hdc_employee_service_user"/>
+
     <menuitem id="menu_hdc_my_attendance"
               name="Миний ирц"
               parent="menu_hdc_employee_service_root"
               action="action_hdc_my_attendance"
-              sequence="10"
+              sequence="20"
               groups="hdc_employee_service.group_hdc_employee_service_user"/>
 </odoo>
