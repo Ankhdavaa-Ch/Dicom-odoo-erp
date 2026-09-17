@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hdc_employee_request_user,HDC employee request user,model_hdc_employee_request,hdc_employee_service.group_hdc_employee_service_user,1,1,1,0
