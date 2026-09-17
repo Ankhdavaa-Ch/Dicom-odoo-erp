@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hdc_employee_service.MyAttendance">
+        <div class="o_hdc_my_attendance">
+            <div class="hdc_att_header">
+                <div>
+                    <h2>Миний ирц</h2>
+                    <div class="text-muted" t-if="state.data">
+                        <t t-esc="state.data.employee.name"/> · <t t-esc="state.data.employee.department"/> · <t t-esc="state.data.employee.job"/>
+                    </div>
+                </div>
+                <div class="hdc_att_nav">
+                    <button class="btn btn-outline-primary" t-on-click="previousMonth">‹</button>
+                    <button class="btn btn-outline-primary" t-on-click="nextMonth">›</button>
+                    <button class="btn btn-primary" t-on-click="today">Өнөөдөр</button>
+                    <strong t-esc="monthTitle"/>
+                </div>
+            </div>
+
+            <div t-if="state.loading" class="p-5 text-center">Уншиж байна...</div>
+            <div t-else="" class="hdc_att_body">
+                <div class="hdc_calendar">
+                    <div class="hdc_weekdays">
+                        <t t-foreach="constructor.weekdays" t-as="weekday" t-key="weekday">
+                            <div t-esc="weekday"/>
+                        </t>
+                    </div>
+                    <t t-foreach="state.weeks" t-as="week" t-key="week_index">
+                        <div class="hdc_week">
+                            <t t-foreach="week" t-as="day" t-key="day.date">
+                                <div t-att-class="'hdc_day ' + (day.is_weekend ? 'hdc_weekend ' : '') + (day.outside ? 'hdc_outside' : '')">
+                                    <div class="hdc_day_number" t-esc="day.day"/>
+                                    <t t-if="!day.outside">
+                                        <div class="hdc_planned">◷ <t t-esc="day.planned"/></div>
+                                        <div class="hdc_day_details">
+                                            <div t-if="day.statusLabel"/>
+                                            <div t-if="day.status !== 'empty'" t-att-class="day.status === 'late' || day.status === 'late_early' ? 'text-danger' : 'text-primary'">
+                                                <t t-esc="statusLabel(day.status)"/>
+                                            </div>
+                                            <div t-if="day.late !== '00:00'" class="text-danger">Хоцорсон <span t-esc="day.late"/></div>
+                                            <div t-if="day.early !== '00:00'" class="text-primary">Эрт явсан <span t-esc="day.early"/></div>
+                                        </div>
+                                        <div class="hdc_actual" t-if="day.check_in || day.check_out">
+                                            <t t-esc="day.check_in || '-'"/> - <t t-esc="day.check_out || '-'"/>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+
+                <aside class="hdc_summary" t-if="state.data">
+                    <div class="hdc_summary_title">Төрөл <span>Хугацаа</span></div>
+                    <div class="hdc_summary_row"><span>Төлөвлөсөн цаг</span><strong t-esc="state.data.totals.planned"/></div>
+                    <div class="hdc_summary_row"><span>Ажилласан цаг</span><strong t-esc="state.data.totals.worked"/></div>
+                    <div class="hdc_summary_row"><span>Хоцорсон</span><strong t-esc="state.data.totals.late"/></div>
+                    <div class="hdc_summary_row"><span>Эрт явсан</span><strong t-esc="state.data.totals.early"/></div>
+                    <div class="hdc_summary_row"><span>Илүү ажилласан</span><strong t-esc="state.data.totals.overtime"/></div>
+                    <div class="hdc_news_title">Мэдээ мэдээлэл</div>
+                    <div class="hdc_empty_news">Одоогоор мэдээ мэдээлэл байхгүй байна.</div>
+                </aside>
+            </div>
+        </div>
+    </t>
+</templates>
