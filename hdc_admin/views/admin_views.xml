@@ -25,6 +25,60 @@
     <record id="action_hdc_system_groups_list_view" model="ir.actions.act_window.view"><field name="sequence" eval="10"/><field name="view_mode">list</field><field name="view_id" ref="view_hdc_system_groups_list"/><field name="act_window_id" ref="action_hdc_system_groups"/></record>
     <record id="action_hdc_system_groups_form_view" model="ir.actions.act_window.view"><field name="sequence" eval="20"/><field name="view_mode">form</field><field name="view_id" ref="view_hdc_system_groups_form"/><field name="act_window_id" ref="action_hdc_system_groups"/></record>
 
+    <record id="view_hdc_admin_employee_request_list" model="ir.ui.view">
+        <field name="name">hdc.employee.request.admin.list</field>
+        <field name="model">hdc.employee.request</field>
+        <field name="arch" type="xml">
+            <list string="Бүх хүсэлт" create="0" delete="0" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-info="state == 'submitted'" decoration-muted="state == 'cancelled'">
+                <field name="name" string="Дугаар"/>
+                <field name="employee_id" string="Ажилтан"/>
+                <field name="department_id" string="Нэгж"/>
+                <field name="request_type" string="Хүсэлтийн төрөл"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="duration_display"/>
+                <field name="state" widget="badge" string="Төлөв"/>
+                <field name="approver_user_id" string="Хэн дээр байгаа"/>
+                <field name="submitted_at" optional="hide"/>
+                <field name="approved_at" optional="hide"/>
+                <field name="rejected_at" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hdc_admin_employee_request_search" model="ir.ui.view">
+        <field name="name">hdc.employee.request.admin.search</field>
+        <field name="model">hdc.employee.request</field>
+        <field name="arch" type="xml">
+            <search string="Бүх хүсэлт">
+                <field name="name"/>
+                <field name="employee_id"/>
+                <field name="department_id"/>
+                <field name="request_type"/>
+                <field name="approver_user_id" string="Хэн дээр байгаа"/>
+                <filter string="Удирдлагад" name="submitted" domain="[('state','=','submitted')]"/>
+                <filter string="Батлагдсан" name="approved" domain="[('state','=','approved')]"/>
+                <filter string="Буцаасан" name="rejected" domain="[('state','=','rejected')]"/>
+                <filter string="Ноорог" name="draft" domain="[('state','=','draft')]"/>
+                <group expand="0" string="Бүлэглэх">
+                    <filter string="Төлөв" name="group_state" context="{'group_by':'state'}"/>
+                    <filter string="Нэгж" name="group_department" context="{'group_by':'department_id'}"/>
+                    <filter string="Хүсэлтийн төрөл" name="group_type" context="{'group_by':'request_type'}"/>
+                    <filter string="Хэн дээр байгаа" name="group_approver" context="{'group_by':'approver_user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_hdc_admin_all_requests" model="ir.actions.act_window">
+        <field name="name">Бүх хүсэлт</field>
+        <field name="res_model">hdc.employee.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_hdc_admin_employee_request_list"/>
+        <field name="search_view_id" ref="view_hdc_admin_employee_request_search"/>
+        <field name="context">{'create': False}</field>
+    </record>
+
     <record id="view_hdc_login_log_list" model="ir.ui.view"><field name="name">hdc.login.log.list</field><field name="model">hdc.login.log</field><field name="arch" type="xml"><list string="Нэвтэрсэн лог" create="0" edit="0" delete="0"><field name="login_at"/><field name="user_id"/><field name="login"/><field name="ip_address"/><field name="user_agent"/></list></field></record>
     <record id="view_hdc_login_log_search" model="ir.ui.view"><field name="name">hdc.login.log.search</field><field name="model">hdc.login.log</field><field name="arch" type="xml"><search string="Нэвтэрсэн лог"><field name="user_id"/><field name="login"/><field name="ip_address"/><field name="login_at"/><group expand="0" string="Бүлэглэх"><filter string="Хэрэглэгч" name="group_user" context="{'group_by': 'user_id'}"/><filter string="Өдөр" name="group_day" context="{'group_by': 'login_at:day'}"/></group></search></field></record>
     <record id="action_hdc_login_log" model="ir.actions.act_window"><field name="name">Нэвтэрсэн лог</field><field name="res_model">hdc.login.log</field><field name="view_mode">list</field><field name="search_view_id" ref="view_hdc_login_log_search"/></record>
