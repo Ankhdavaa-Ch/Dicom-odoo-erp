@@ -3,5 +3,6 @@
     <menuitem id="menu_hdc_admin_root" name="Админ" parent="hdc_erp_base.menu_hdc_erp_root" sequence="90" groups="base.group_system"/>
     <menuitem id="menu_hdc_system_users" name="Системийн хэрэглэгч" parent="menu_hdc_admin_root" action="action_hdc_system_users" sequence="10" groups="base.group_system"/>
     <menuitem id="menu_hdc_system_groups" name="Системийн дүр" parent="menu_hdc_admin_root" action="action_hdc_system_groups" sequence="20" groups="base.group_system"/>
-    <menuitem id="menu_hdc_login_log" name="Нэвтэрсэн лог" parent="menu_hdc_admin_root" action="action_hdc_login_log" sequence="30" groups="base.group_system"/>
+    <menuitem id="menu_hdc_admin_all_requests" name="Бүх хүсэлт" parent="menu_hdc_admin_root" action="action_hdc_admin_all_requests" sequence="30" groups="base.group_system"/>
+    <menuitem id="menu_hdc_login_log" name="Нэвтэрсэн лог" parent="menu_hdc_admin_root" action="action_hdc_login_log" sequence="40" groups="base.group_system"/>
 </odoo>
