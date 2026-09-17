@@ -1,4 +1,5 @@
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class ResUsers(models.Model):
@@ -78,7 +79,26 @@ class ResUsers(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        users = super().create(vals_list)
+        prepared_vals_list = []
+        for vals in vals_list:
+            vals = dict(vals)
+            employee_id = vals.get('hdc_employee_id')
+            if employee_id:
+                employee = self.env['hr.employee'].sudo().browse(employee_id).exists()
+                if not employee:
+                    raise ValidationError('Сонгосон ажилтны бүртгэл олдсонгүй.')
+                # res.users creates a linked res.partner first. The partner requires a name,
+                # so always populate the user name server-side from the linked employee.
+                vals['name'] = employee.name
+                if not vals.get('email') and employee.work_email:
+                    vals['email'] = employee.work_email
+                if not vals.get('phone') and employee.work_phone:
+                    vals['phone'] = employee.work_phone
+            if not vals.get('name'):
+                raise ValidationError('Системийн хэрэглэгч үүсгэхийн өмнө ажилтан сонгоно уу.')
+            prepared_vals_list.append(vals)
+
+        users = super().create(prepared_vals_list)
         for user in users:
             if user.hdc_employee_id and user.hdc_employee_id.user_id != user:
                 user.hdc_employee_id.sudo().user_id = user.id
@@ -90,6 +110,13 @@ class ResUsers(models.Model):
             return super().write(vals)
 
         old_employees = {user.id: user.hdc_employee_id for user in self}
+        vals = dict(vals)
+        if 'hdc_employee_id' in vals and vals.get('hdc_employee_id'):
+            employee = self.env['hr.employee'].sudo().browse(vals['hdc_employee_id']).exists()
+            if not employee:
+                raise ValidationError('Сонгосон ажилтны бүртгэл олдсонгүй.')
+            vals['name'] = employee.name
+
         result = super().write(vals)
 
         if 'hdc_employee_id' in vals:
