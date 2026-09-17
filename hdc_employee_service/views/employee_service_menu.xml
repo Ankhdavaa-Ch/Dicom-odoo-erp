@@ -5,23 +5,27 @@
         <field name="tag">hdc_employee_service.my_attendance</field>
     </record>
 
-    <menuitem id="menu_hdc_employee_service_root"
-              name="Ажилтны үйлчилгээ"
-              parent="hdc_erp_base.menu_hdc_erp_root"
-              sequence="30"
+    <menuitem id="menu_hdc_employee_service_root" name="Ажилтны үйлчилгээ"
+              parent="hdc_erp_base.menu_hdc_erp_root" sequence="30"
               groups="hdc_employee_service.group_hdc_employee_service_user"/>
 
-    <menuitem id="menu_hdc_my_profile"
-              name="Миний анкет"
-              parent="menu_hdc_employee_service_root"
-              action="action_hdc_my_profile"
-              sequence="10"
+    <menuitem id="menu_hdc_my_profile" name="Миний анкет"
+              parent="menu_hdc_employee_service_root" action="action_hdc_my_profile" sequence="10"
               groups="hdc_employee_service.group_hdc_employee_service_user"/>
 
-    <menuitem id="menu_hdc_my_attendance"
-              name="Миний ирц"
-              parent="menu_hdc_employee_service_root"
-              action="action_hdc_my_attendance"
-              sequence="20"
+    <menuitem id="menu_hdc_my_attendance" name="Миний ирц"
+              parent="menu_hdc_employee_service_root" action="action_hdc_my_attendance" sequence="20"
+              groups="hdc_employee_service.group_hdc_employee_service_user"/>
+
+    <menuitem id="menu_hdc_requests_root" name="Хүсэлт, санал"
+              parent="menu_hdc_employee_service_root" sequence="30"
+              groups="hdc_employee_service.group_hdc_employee_service_user"/>
+
+    <menuitem id="menu_hdc_my_requests" name="Миний хүсэлтүүд"
+              parent="menu_hdc_requests_root" action="action_hdc_my_requests" sequence="10"
+              groups="hdc_employee_service.group_hdc_employee_service_user"/>
+
+    <menuitem id="menu_hdc_requests_to_approve" name="Батлах хүсэлтүүд"
+              parent="menu_hdc_requests_root" action="action_hdc_requests_to_approve" sequence="20"
               groups="hdc_employee_service.group_hdc_employee_service_user"/>
 </odoo>
