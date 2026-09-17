@@ -1,7 +1,18 @@
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 
-from odoo import api, models
+from odoo import api, fields, models
 from odoo.exceptions import UserError
+
+
+REQUEST_LABELS = {
+    'outside_work': 'Гадуур ажиллах',
+    'leave': 'Чөлөө',
+    'attendance_correction': 'Ирц нөхөн бүртгүүлэх',
+    'annual_leave': 'Ээлжийн амралт',
+    'overtime': 'Илүү цаг',
+    'sick': 'Өвчтэй',
+    'training_leave': 'Сургалтын чөлөө',
+}
 
 
 class HdcAttendanceDaily(models.Model):
@@ -21,15 +32,54 @@ class HdcAttendanceDaily(models.Model):
             ('attendance_date', '<=', end),
         ], order='attendance_date')
 
+        # Odoo stores Datetime values in UTC. Search a slightly wider UTC range so
+        # requests near the Mongolia day boundary are included, then split them by
+        # local calendar day below.
+        utc_from = datetime.combine(start, time.min) - timedelta(hours=8)
+        utc_to = datetime.combine(end + timedelta(days=1), time.min) - timedelta(hours=8)
+        requests = self.env['hdc.employee.request'].sudo().search([
+            ('employee_id', '=', employee.id),
+            ('state', '=', 'approved'),
+            ('date_from', '<', utc_to),
+            ('date_to', '>', utc_from),
+        ], order='date_from')
+
         def hhmm(minutes):
             minutes = max(int(minutes or 0), 0)
             return f'{minutes // 60:02d}:{minutes % 60:02d}'
 
+        def local_dt(value):
+            return value + timedelta(hours=8) if value else False
+
         def local_hm(value):
-            if not value:
-                return ''
-            local_value = value + timedelta(hours=8)
-            return local_value.strftime('%H:%M')
+            value = local_dt(value)
+            return value.strftime('%H:%M') if value else ''
+
+        requests_by_date = {}
+        request_totals = {key: 0 for key in REQUEST_LABELS}
+        for request in requests:
+            local_from = local_dt(request.date_from)
+            local_to = local_dt(request.date_to)
+            current_day = max(local_from.date(), start)
+            last_day = min(local_to.date(), end)
+            while current_day <= last_day:
+                day_start = datetime.combine(current_day, time.min)
+                day_end = day_start + timedelta(days=1)
+                overlap_start = max(local_from, day_start)
+                overlap_end = min(local_to, day_end)
+                minutes = max(int((overlap_end - overlap_start).total_seconds() / 60), 0)
+                if minutes:
+                    item = {
+                        'id': request.id,
+                        'type': request.request_type,
+                        'label': REQUEST_LABELS.get(request.request_type, request.request_type),
+                        'time': f'{overlap_start.strftime("%H:%M")} - {overlap_end.strftime("%H:%M")}',
+                        'minutes': minutes,
+                        'duration': hhmm(minutes),
+                    }
+                    requests_by_date.setdefault(current_day, []).append(item)
+                    request_totals[request.request_type] = request_totals.get(request.request_type, 0) + minutes
+                current_day += timedelta(days=1)
 
         days = []
         totals = {
@@ -46,6 +96,7 @@ class HdcAttendanceDaily(models.Model):
             weekday = cursor.weekday()
             planned = 480 if weekday < 5 else 0
             totals['planned_minutes'] += planned
+            day_requests = requests_by_date.get(cursor, [])
             if record:
                 totals['worked_minutes'] += record.worked_minutes
                 totals['late_minutes'] += record.late_minutes
@@ -64,6 +115,7 @@ class HdcAttendanceDaily(models.Model):
                     'early': hhmm(record.early_leave_minutes),
                     'overtime': hhmm(record.overtime_minutes),
                     'status': record.status,
+                    'requests': day_requests,
                 })
             else:
                 days.append({
@@ -71,6 +123,7 @@ class HdcAttendanceDaily(models.Model):
                     'is_weekend': weekday >= 5, 'planned': '08:00 - 17:00' if weekday < 5 else '-',
                     'check_in': '', 'check_out': '', 'worked': '00:00', 'late': '00:00',
                     'early': '00:00', 'overtime': '00:00', 'status': 'empty',
+                    'requests': day_requests,
                 })
             cursor += timedelta(days=1)
 
@@ -88,5 +141,12 @@ class HdcAttendanceDaily(models.Model):
                 'late': hhmm(totals['late_minutes']),
                 'early': hhmm(totals['early_leave_minutes']),
                 'overtime': hhmm(totals['overtime_minutes']),
+                'outside_work': hhmm(request_totals['outside_work']),
+                'leave': hhmm(request_totals['leave']),
+                'attendance_correction': hhmm(request_totals['attendance_correction']),
+                'annual_leave': hhmm(request_totals['annual_leave']),
+                'sick': hhmm(request_totals['sick']),
+                'training_leave': hhmm(request_totals['training_leave']),
+                'request_overtime': hhmm(request_totals['overtime']),
             },
         }
