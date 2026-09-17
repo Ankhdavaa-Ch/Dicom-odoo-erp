@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_hdc_my_attendance" model="ir.actions.client">
+        <field name="name">Миний ирц</field>
+        <field name="tag">hdc_employee_service.my_attendance</field>
+    </record>
+
+    <menuitem id="menu_hdc_employee_service_root"
+              name="Ажилтны үйлчилгээ"
+              parent="hdc_erp_base.menu_hdc_erp_root"
+              sequence="30"
+              groups="hdc_employee_service.group_hdc_employee_service_user"/>
+
+    <menuitem id="menu_hdc_my_attendance"
+              name="Миний ирц"
+              parent="menu_hdc_employee_service_root"
+              action="action_hdc_my_attendance"
+              sequence="10"
+              groups="hdc_employee_service.group_hdc_employee_service_user"/>
+</odoo>
