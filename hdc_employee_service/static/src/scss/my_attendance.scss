@@ -1,0 +1,22 @@
+.o_hdc_my_attendance { padding: 16px; height: 100%; overflow: auto; background: #fff; }
+.hdc_att_header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:16px; }
+.hdc_att_header h2 { margin:0; font-weight:700; }
+.hdc_att_nav { display:flex; align-items:center; gap:8px; }
+.hdc_att_body { display:grid; grid-template-columns:minmax(760px, 1fr) 360px; gap:16px; align-items:start; }
+.hdc_calendar { border:1px solid #d9e1e8; }
+.hdc_weekdays, .hdc_week { display:grid; grid-template-columns:repeat(7, 1fr); }
+.hdc_weekdays > div { text-align:center; padding:8px; font-weight:600; background:#edf5fa; border-right:1px solid #d9e1e8; }
+.hdc_day { min-height:190px; position:relative; padding:8px; border-top:1px solid #d9e1e8; border-right:1px solid #d9e1e8; }
+.hdc_weekend { background:#fffbe0; }
+.hdc_outside { color:#aaa; background:#fafafa; }
+.hdc_day_number { text-align:right; font-size:16px; margin-bottom:8px; }
+.hdc_planned { background:#345a91; color:white; border-radius:4px; padding:4px 7px; font-weight:600; }
+.hdc_day_details { margin-top:12px; font-size:12px; line-height:1.6; }
+.hdc_actual { position:absolute; left:7px; right:7px; bottom:7px; background:#35a451; color:#fff; border-radius:4px; padding:3px 6px; font-size:12px; font-weight:600; }
+.hdc_summary { border:1px solid #d9e1e8; }
+.hdc_summary_title, .hdc_news_title { background:#22b8c7; color:#fff; font-weight:700; padding:10px 12px; }
+.hdc_summary_title { display:flex; justify-content:space-between; }
+.hdc_summary_row { display:flex; justify-content:space-between; padding:9px 12px; border-bottom:1px solid #edf0f2; }
+.hdc_news_title { margin-top:16px; }
+.hdc_empty_news { min-height:180px; display:flex; align-items:center; justify-content:center; text-align:center; color:#888; padding:24px; }
+@media (max-width: 1100px) { .hdc_att_body { grid-template-columns:1fr; } .hdc_summary { width:100%; } }
