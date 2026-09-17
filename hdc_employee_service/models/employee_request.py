@@ -30,9 +30,21 @@ class HdcEmployeeRequest(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'create_date desc'
 
+    @api.model
+    def _default_employee_id(self):
+        employee = self.env['hr.employee'].sudo().search([('user_id', '=', self.env.uid)], limit=1)
+        return employee.id if employee else False
+
     name = fields.Char(string='Хүсэлтийн дугаар', default='Шинэ', readonly=True, copy=False, tracking=True)
     request_type = fields.Selection(REQUEST_TYPES, string='Хүсэлтийн төрөл', required=True, tracking=True)
-    employee_id = fields.Many2one('hr.employee', string='Ажилтан', required=True, readonly=True, tracking=True)
+    employee_id = fields.Many2one(
+        'hr.employee',
+        string='Ажилтан',
+        required=True,
+        readonly=True,
+        default=_default_employee_id,
+        tracking=True,
+    )
     department_id = fields.Many2one('hr.department', string='Нэгж', related='employee_id.department_id', store=True, readonly=True)
     approver_user_id = fields.Many2one('res.users', string='Нэгжийн удирдлага', readonly=True, tracking=True)
     date_from = fields.Datetime(string='Эхлэх огноо, цаг', required=True, tracking=True)
