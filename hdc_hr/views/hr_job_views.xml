@@ -8,7 +8,7 @@
         <field name="arch" type="xml">
             <list string="Албан тушаал">
                 <field name="name"/>
-                <field name="department_id"/>
+                <field name="hdc_department_name" string="Department"/>
                 <field name="company_id"/>
                 <field name="no_of_employee"/>
             </list>
