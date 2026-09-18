@@ -8,3 +8,4 @@ from . import hr_structure
 from . import hr_structure_node
 
 from . import hr_department
+from . import hr_job
