@@ -46,7 +46,6 @@
 
                     </group>
 
-
                     <separator string="Гэрийн хаяг"/>
 
                     <group col="4">
@@ -132,21 +131,26 @@
     </record>
 
     <record id="view_employee_department_short_name" model="ir.ui.view">
-    <field name="name">hr.employee.department.short.name</field>
-    <field name="model">hr.employee</field>
-    <field name="inherit_id" ref="hr.view_employee_form"/>
-    <field name="arch" type="xml">
+        <field name="name">hr.employee.department.short.name</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='department_id']" position="attributes">
+                <attribute name="context">{'hdc_short_name': True}</attribute>
+                <attribute name="domain">[('hdc_unit_type', 'in', ['department', 'division', 'office', 'unit'])]</attribute>
+            </xpath>
+        </field>
+    </record>
 
-        <xpath expr="//field[@name='department_id']" position="attributes">
-            <attribute name="context">
-                {'hdc_short_name': True}
-            </attribute>
-              <attribute name="domain">
-                [('hdc_unit_type', 'in', ['department', 'division', 'office', 'unit'])]
-            </attribute>
-        </xpath>
-
-    </field>
-</record>
+    <record id="view_employee_list_department_short_name" model="ir.ui.view">
+        <field name="name">hr.employee.list.department.short.name</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='department_id']" position="attributes">
+                <attribute name="context">{'hdc_short_name': True}</attribute>
+            </xpath>
+        </field>
+    </record>
 
 </odoo>
