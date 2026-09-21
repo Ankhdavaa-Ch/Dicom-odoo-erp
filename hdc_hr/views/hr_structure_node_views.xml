@@ -1,180 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!-- LIST VIEW -->
     <record id="view_hdc_hr_structure_node_list" model="ir.ui.view">
         <field name="name">hdc.hr.structure.node.list</field>
         <field name="model">hdc.hr.structure.node</field>
-
         <field name="arch" type="xml">
             <list string="Бүтцийн нэгжүүд">
-
                 <field name="sequence" widget="handle"/>
-                <field name="code"/>
                 <field name="name"/>
                 <field name="node_type"/>
                 <field name="parent_id"/>
-                <field name="structure_id"/>
-                <field name="department_id"/>
-                <field name="job_id"/>
                 <field name="manager_employee_id"/>
-
+                <field name="employee_count"/>
+                <field name="structure_id"/>
             </list>
         </field>
     </record>
 
-
-    <!-- FORM VIEW -->
     <record id="view_hdc_hr_structure_node_form" model="ir.ui.view">
         <field name="name">hdc.hr.structure.node.form</field>
         <field name="model">hdc.hr.structure.node</field>
-
         <field name="arch" type="xml">
-
             <form string="Бүтцийн нэгж">
-
                 <sheet>
-
                     <div class="oe_title">
                         <label for="name"/>
-
-                        <h1>
-                            <field name="name"/>
-                        </h1>
+                        <h1><field name="name"/></h1>
                     </div>
-
                     <group>
-
-                        <group string="Үндсэн мэдээлэл">
-
-                            <field name="code"/>
-                            <field name="structure_id"/>
+                        <group string="Бүтцийн мэдээлэл">
+                            <field name="structure_id" readonly="1"/>
                             <field name="node_type"/>
                             <field name="parent_id"/>
                             <field name="sequence"/>
-
                         </group>
-
-                        <group string="Odoo холбоос">
-
-                            <field name="department_id"/>
-                            <field name="job_id"/>
+                        <group string="Удирдлага">
                             <field name="manager_employee_id"/>
-
+                            <field name="employee_count" readonly="1"/>
+                            <field name="department_id" readonly="1" context="{'hdc_short_name': True}"/>
                         </group>
-
                     </group>
-
                     <group>
-                        <field name="complete_name" readonly="1"/>
+                        <field name="note" placeholder="Нэмэлт тайлбар..."/>
                     </group>
-
-                    <notebook>
-
-                        <page string="Харьяа нэгжүүд">
-
-                            <field name="child_ids">
-
-                                <list editable="bottom">
-
-                                    <field name="sequence" widget="handle"/>
-                                    <field name="code"/>
-                                    <field name="name"/>
-                                    <field name="node_type"/>
-
-                                </list>
-
-                            </field>
-
-                        </page>
-
-                        <page string="Тайлбар">
-                            <field name="note"/>
-                        </page>
-
-                    </notebook>
-
                 </sheet>
-
             </form>
-
         </field>
     </record>
 
-
-    <!-- HIERARCHY VIEW -->
     <record id="view_hdc_hr_structure_node_hierarchy" model="ir.ui.view">
-
         <field name="name">hdc.hr.structure.node.hierarchy</field>
         <field name="model">hdc.hr.structure.node</field>
-
         <field name="arch" type="xml">
-
-            <hierarchy child_field="child_ids">
-
+            <hierarchy child_field="child_ids" draggable="0">
                 <field name="name"/>
-                <field name="code"/>
                 <field name="node_type"/>
+                <field name="manager_employee_id"/>
+                <field name="employee_count"/>
                 <field name="department_id"/>
-
                 <templates>
-
                     <t t-name="hierarchy-box">
-
-                        <div class="o_hierarchy_node_header">
-
-                            <strong>
+                        <div class="hdc_org_card">
+                            <div class="hdc_org_card_title">
                                 <field name="name"/>
-                            </strong>
-
-                        </div>
-
-                        <div class="o_hierarchy_node_body">
-
-                            <div>
-                                Код:
-                                <field name="code"/>
                             </div>
-
-                            <div>
-                                Төрөл:
-                                <field name="node_type"/>
+                            <div class="hdc_org_card_meta">
+                                <span class="hdc_org_badge"><field name="node_type"/></span>
                             </div>
-
+                            <div class="hdc_org_manager" t-if="record.manager_employee_id.raw_value">
+                                <i class="fa fa-user-circle me-1"/>
+                                <field name="manager_employee_id"/>
+                            </div>
+                            <div class="hdc_org_count">
+                                <i class="fa fa-users me-1"/>
+                                <span>Ажилтан: </span><field name="employee_count"/>
+                            </div>
                         </div>
-
                     </t>
-
                 </templates>
-
             </hierarchy>
-
         </field>
-
     </record>
 
-
-    <!-- ACTION 1: БҮТЦИЙН НЭГЖҮҮД -->
     <record id="action_hdc_hr_structure_node_list" model="ir.actions.act_window">
-
         <field name="name">Бүтцийн нэгжүүд</field>
-
         <field name="res_model">hdc.hr.structure.node</field>
-
         <field name="view_mode">list,form</field>
-
     </record>
 
-
-    <!-- ACTION 2: БҮТЦИЙН СХЕМ -->
     <record id="action_hdc_hr_structure_node_hierarchy" model="ir.actions.act_window">
-
-        <field name="name">Бүтцийн схем</field>
-
+        <field name="name">Байгууллагын бүтэц</field>
         <field name="res_model">hdc.hr.structure.node</field>
-
-        <field name="view_mode">hierarchy</field>
-
+        <field name="view_mode">hierarchy,form</field>
+        <field name="domain">[('structure_id.state', '=', 'active')]</field>
+        <field name="context">{'create': False, 'delete': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Идэвхтэй байгууллагын бүтэц олдсонгүй.</p>
+            <p>Бүтцийн хувилбарыг идэвхжүүлсний дараа энд зөвхөн идэвхтэй бүтэц харагдана.</p>
+        </field>
     </record>
-
 </odoo>
