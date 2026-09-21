@@ -1,0 +1,86 @@
+.hdc_org_hierarchy {
+    --hdc-green: #118b45;
+    --hdc-green-dark: #087536;
+    --hdc-green-soft: #f1fbf5;
+
+    .o_hierarchy_node_container {
+        min-width: 220px;
+    }
+
+    .o_hierarchy_node {
+        border: 1px solid #7dbf95 !important;
+        border-radius: 12px !important;
+        background: #fff !important;
+        box-shadow: 0 2px 7px rgba(0, 0, 0, .07);
+        overflow: hidden;
+    }
+
+    .hdc_org_card {
+        min-width: 210px;
+        padding: 14px 16px 12px;
+        color: #164d2b;
+        text-align: left;
+    }
+
+    .hdc_org_card_title {
+        color: var(--hdc-green-dark);
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.35;
+        margin-bottom: 8px;
+    }
+
+    .hdc_org_badge {
+        display: inline-block;
+        padding: 2px 9px;
+        margin-bottom: 8px;
+        border-radius: 999px;
+        background: #e4f5ea;
+        color: var(--hdc-green-dark);
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .hdc_org_manager,
+    .hdc_org_count {
+        margin-top: 4px;
+        color: #53645a;
+        font-size: 12px;
+    }
+
+    .hdc_org_organization {
+        background: var(--hdc-green) !important;
+        color: #fff;
+
+        .hdc_org_card_title,
+        .hdc_org_manager,
+        .hdc_org_count {
+            color: #fff;
+        }
+
+        .hdc_org_badge {
+            background: rgba(255,255,255,.18);
+            color: #fff;
+        }
+    }
+
+    .hdc_org_management {
+        border-left: 5px solid var(--hdc-green) !important;
+    }
+
+    .hdc_org_department {
+        background: var(--hdc-green-soft) !important;
+        border-color: #4ca46d !important;
+    }
+
+    .hdc_org_division,
+    .hdc_org_office {
+        background: #fbfffc !important;
+    }
+
+    .o_hierarchy_node_button {
+        background: var(--hdc-green) !important;
+        color: #fff !important;
+        border-color: var(--hdc-green) !important;
+    }
+}
