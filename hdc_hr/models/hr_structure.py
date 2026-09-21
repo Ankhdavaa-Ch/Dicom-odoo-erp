@@ -120,22 +120,33 @@ class HdcHrStructure(models.Model):
                     node = Node.with_context(skip_hdc_department_sync=True).create(values)
                 node_by_department[department.id] = node
 
-            # DICOM chart rule:
-            # Санхүү бүртгэлийн алба is a direct child of the National Committee,
-            # therefore it appears beside Гүйцэтгэх захирал and Дотоод аудитын алба.
+            # DICOM chart rule: these units report directly to the National Committee
+            # and therefore appear on the same level in the organization chart.
             finance_office = departments.filtered(
                 lambda d: (d.name or '').strip().lower() == 'санхүү бүртгэлийн алба'
             )[:1]
+            chief_economist = departments.filtered(
+                lambda d: (d.name or '').strip().lower() == 'ерөнхий эдийн засагч'
+            )[:1]
+
             if finance_office and finance_office.parent_id != root:
                 finance_office.with_context(skip_hdc_structure_sync=True).write({
                     'parent_id': root.id,
                     'hdc_unit_type': 'office',
                 })
+            if chief_economist and chief_economist.parent_id != root:
+                chief_economist.with_context(skip_hdc_structure_sync=True).write({
+                    'parent_id': root.id,
+                    'hdc_unit_type': 'management',
+                })
 
             for department in departments:
                 node = node_by_department[department.id]
 
-                if finance_office and department.id == finance_office.id:
+                is_finance_office = bool(finance_office and department.id == finance_office.id)
+                is_chief_economist = bool(chief_economist and department.id == chief_economist.id)
+
+                if is_finance_office or is_chief_economist:
                     parent_node = node_by_department.get(root.id)
                 else:
                     parent_node = (
@@ -145,7 +156,11 @@ class HdcHrStructure(models.Model):
 
                 node.with_context(skip_hdc_department_sync=True).write({
                     'parent_id': parent_node.id if parent_node else False,
-                    'node_type': 'office' if finance_office and department.id == finance_office.id else node.node_type,
+                    'node_type': (
+                        'office' if is_finance_office
+                        else 'management' if is_chief_economist
+                        else node.node_type
+                    ),
                 })
 
         return {
