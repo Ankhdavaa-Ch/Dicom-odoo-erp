@@ -51,7 +51,7 @@
         <field name="name">hdc.hr.structure.node.hierarchy</field>
         <field name="model">hdc.hr.structure.node</field>
         <field name="arch" type="xml">
-            <hierarchy child_field="child_ids" draggable="0">
+            <hierarchy child_field="child_ids" draggable="0" class="hdc_org_hierarchy">
                 <field name="name"/>
                 <field name="node_type"/>
                 <field name="manager_employee_id"/>
@@ -59,7 +59,7 @@
                 <field name="department_id"/>
                 <templates>
                     <t t-name="hierarchy-box">
-                        <div class="hdc_org_card">
+                        <div t-attf-class="hdc_org_card hdc_org_#{record.node_type.raw_value || 'unit'}">
                             <div class="hdc_org_card_title">
                                 <field name="name"/>
                             </div>
@@ -92,7 +92,7 @@
         <field name="res_model">hdc.hr.structure.node</field>
         <field name="view_mode">hierarchy,form</field>
         <field name="domain">[('structure_id.state', '=', 'active')]</field>
-        <field name="context">{'create': False, 'delete': False}</field>
+        <field name="context">{'create': False, 'delete': False, 'hierarchy_expand': True}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Идэвхтэй байгууллагын бүтэц олдсонгүй.</p>
             <p>Бүтцийн хувилбарыг идэвхжүүлсний дараа энд зөвхөн идэвхтэй бүтэц харагдана.</p>
