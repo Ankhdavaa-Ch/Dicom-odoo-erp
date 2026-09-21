@@ -53,6 +53,11 @@ class HdcHrStructureNode(models.Model):
         store=True, recursive=True,
     )
     note = fields.Text(string='Тайлбар')
+    employee_count = fields.Integer(
+        string='Ажилтны тоо',
+        related='department_id.total_employee',
+        readonly=True,
+    )
 
     _sql_constraints = [
         (
@@ -141,3 +146,12 @@ class HdcHrStructureNode(models.Model):
         for record in self:
             if record.parent_id and record.parent_id.structure_id != record.structure_id:
                 raise ValidationError('Харьяалах дээд нэгж ижил бүтцийн хувилбарт байх ёстой.')
+
+    @api.model
+    def get_active_structure_id(self):
+        structure = self.env['hdc.hr.structure'].search(
+            [('state', '=', 'active')],
+            order='date_from desc, id desc',
+            limit=1,
+        )
+        return structure.id or False
