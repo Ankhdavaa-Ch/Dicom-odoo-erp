@@ -88,11 +88,25 @@ class HdcHrStructure(models.Model):
                     ('department_id', '=', department.id),
                 ], limit=1)
 
+                node_type = 'organization' if department.id == root.id else mapping.get(department.hdc_unit_type, 'unit')
+                # Existing imported data may not have unit types yet. Infer the obvious
+                # organization levels from their names so the chart is readable.
+                if department.id != root.id and (not department.hdc_unit_type or node_type == 'unit'):
+                    name = (department.name or '').strip().lower()
+                    if name == 'гүйцэтгэх захирал':
+                        node_type = 'management'
+                    elif name.endswith(' газар'):
+                        node_type = 'department'
+                    elif name.endswith(' хэлтэс'):
+                        node_type = 'division'
+                    elif name.endswith(' алба'):
+                        node_type = 'office'
+
                 values = {
                     'name': department.name,
                     'structure_id': structure.id,
                     'department_id': department.id,
-                    'node_type': 'organization' if department.id == root.id else mapping.get(department.hdc_unit_type, 'unit'),
+                    'node_type': node_type,
                     'manager_employee_id': department.manager_id.id if department.manager_id else False,
                 }
                 if 'code' in department._fields:
