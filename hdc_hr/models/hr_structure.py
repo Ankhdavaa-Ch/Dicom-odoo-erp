@@ -120,14 +120,32 @@ class HdcHrStructure(models.Model):
                     node = Node.with_context(skip_hdc_department_sync=True).create(values)
                 node_by_department[department.id] = node
 
+            # DICOM chart rule:
+            # Санхүү бүртгэлийн алба is a direct child of the National Committee,
+            # therefore it appears beside Гүйцэтгэх захирал and Дотоод аудитын алба.
+            finance_office = departments.filtered(
+                lambda d: (d.name or '').strip().lower() == 'санхүү бүртгэлийн алба'
+            )[:1]
+            if finance_office and finance_office.parent_id != root:
+                finance_office.with_context(skip_hdc_structure_sync=True).write({
+                    'parent_id': root.id,
+                    'hdc_unit_type': 'office',
+                })
+
             for department in departments:
                 node = node_by_department[department.id]
-                parent_node = (
-                    node_by_department.get(department.parent_id.id)
-                    if department.id != root.id and department.parent_id else False
-                )
+
+                if finance_office and department.id == finance_office.id:
+                    parent_node = node_by_department.get(root.id)
+                else:
+                    parent_node = (
+                        node_by_department.get(department.parent_id.id)
+                        if department.id != root.id and department.parent_id else False
+                    )
+
                 node.with_context(skip_hdc_department_sync=True).write({
                     'parent_id': parent_node.id if parent_node else False,
+                    'node_type': 'office' if finance_office and department.id == finance_office.id else node.node_type,
                 })
 
         return {
