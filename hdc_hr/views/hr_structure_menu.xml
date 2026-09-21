@@ -1,48 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
     <!-- Албан тушаал -->
-    <menuitem
-        id="menu_hdc_hr_job_position_list"
-        name="Албан тушаал"
-        parent="hr.menu_hr_root"
-        action="action_hdc_hr_job_position"
-        sequence="25"
-    />
+    <menuitem id="menu_hdc_hr_job_position_list"
+              name="Албан тушаал"
+              parent="hr.menu_hr_root"
+              action="action_hdc_hr_job_position"
+              sequence="25"/>
 
-    <!-- Байгууллагын бүтэц -->
-    <menuitem
-        id="menu_hdc_hr_organization"
-        name="Байгууллагын бүтэц"
-        parent="hr.menu_hr_root"
-        sequence="30"
-    />
+    <!--
+        Хэрэглэгчид 3 техникийн цэс харуулахгүй.
+        Байгууллагын бүтэц дээр дарахад шууд схем нээгдэнэ.
+        Хувилбар болон нэгжийн бүртгэлийг схемийн дэлгэцээс удирдана.
+    -->
+    <menuitem id="menu_hdc_hr_organization"
+              name="Байгууллагын бүтэц"
+              parent="hr.menu_hr_root"
+              action="action_hdc_hr_structure_node_hierarchy"
+              sequence="30"/>
 
-    <!-- Бүтцийн хувилбар -->
-    <menuitem
-        id="menu_hdc_hr_structure"
-        name="Бүтцийн хувилбар"
-        parent="menu_hdc_hr_organization"
-        action="action_hdc_hr_structure"
-        sequence="10"
-    />
-
-    <!-- Бүтцийн нэгжүүд -->
-    <menuitem
-        id="menu_hdc_hr_structure_nodes"
-        name="Бүтцийн нэгжүүд"
-        parent="menu_hdc_hr_organization"
-        action="action_hdc_hr_structure_node_list"
-        sequence="20"
-    />
-
-    <!-- Бүтцийн схем -->
-    <menuitem
-        id="menu_hdc_hr_structure_scheme"
-        name="Бүтцийн схем"
-        parent="menu_hdc_hr_organization"
-        action="action_hdc_hr_structure_node_hierarchy"
-        sequence="30"
-    />
-
+    <record id="menu_hdc_hr_structure" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+    <record id="menu_hdc_hr_structure_nodes" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
+    <record id="menu_hdc_hr_structure_scheme" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
 </odoo>
