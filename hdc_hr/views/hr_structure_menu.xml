@@ -1,30 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Албан тушаал -->
     <menuitem id="menu_hdc_hr_job_position_list"
               name="Албан тушаал"
               parent="hr.menu_hr_root"
               action="action_hdc_hr_job_position"
               sequence="25"/>
 
-    <!--
-        Хэрэглэгчид 3 техникийн цэс харуулахгүй.
-        Байгууллагын бүтэц дээр дарахад шууд схем нээгдэнэ.
-        Хувилбар болон нэгжийн бүртгэлийг схемийн дэлгэцээс удирдана.
-    -->
     <menuitem id="menu_hdc_hr_organization"
               name="Байгууллагын бүтэц"
               parent="hr.menu_hr_root"
               action="action_hdc_hr_structure_node_hierarchy"
               sequence="30"/>
 
-    <record id="menu_hdc_hr_structure" model="ir.ui.menu">
-        <field name="active" eval="False"/>
-    </record>
-    <record id="menu_hdc_hr_structure_nodes" model="ir.ui.menu">
-        <field name="active" eval="False"/>
-    </record>
-    <record id="menu_hdc_hr_structure_scheme" model="ir.ui.menu">
-        <field name="active" eval="False"/>
-    </record>
+    <menuitem id="menu_hdc_hr_structure_setup"
+              name="Бүтцийн тохиргоо"
+              parent="hr.menu_hr_root"
+              action="action_hdc_hr_structure_setup"
+              sequence="31"
+              groups="hr.group_hr_manager"/>
+
+    <record id="menu_hdc_hr_structure" model="ir.ui.menu"><field name="active" eval="False"/></record>
+    <record id="menu_hdc_hr_structure_nodes" model="ir.ui.menu"><field name="active" eval="False"/></record>
+    <record id="menu_hdc_hr_structure_scheme" model="ir.ui.menu"><field name="active" eval="False"/></record>
 </odoo>
