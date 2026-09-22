@@ -39,7 +39,9 @@ class HdcEmployeeRequest(models.Model):
     request_type = fields.Selection(REQUEST_TYPES, string='Хүсэлтийн төрөл', required=True, tracking=True)
     employee_id = fields.Many2one('hr.employee', string='Ажилтан', required=True, readonly=True, default=_default_employee_id, tracking=True)
     department_id = fields.Many2one('hr.department', string='Нэгж', related='employee_id.department_id', store=True, readonly=True)
-    approver_user_id = fields.Many2one('res.users', string='Нэгжийн удирдлага', readonly=True, tracking=True)
+    approver_user_id = fields.Many2one('res.users', string='Одоогийн батлагч', readonly=True, tracking=True)
+    current_approval_level = fields.Selection([('department', 'Хэлтсийн захирал'), ('division', 'Газрын захирал'), ('executive', 'Гүйцэтгэх захирал')], string='Одоогийн батлах шат', readonly=True, tracking=True)
+    final_approval_level = fields.Selection([('department', 'Хэлтсийн захирал'), ('division', 'Газрын захирал'), ('executive', 'Гүйцэтгэх захирал')], string='Эцсийн батлах шат', readonly=True, tracking=True)
     date_from = fields.Datetime(string='Эхлэх огноо, цаг', required=True, tracking=True)
     date_to = fields.Datetime(string='Дуусах огноо, цаг', required=True, tracking=True)
     duration_minutes = fields.Integer(string='Нийт минут', compute='_compute_duration', store=True)
@@ -102,15 +104,53 @@ class HdcEmployeeRequest(models.Model):
                 note=note,
             )
 
+    def _approval_level_for_request(self):
+        self.ensure_one()
+        if self.request_type == 'annual_leave':
+            return 'executive'
+        if self.request_type == 'leave':
+            return 'department' if self.duration_minutes < 24 * 60 else 'division'
+        return 'department'
+
+    def _approver_for_level(self, level):
+        self.ensure_one()
+        department = self.department_id
+        if not department:
+            return self.env['res.users']
+        if level == 'department':
+            return department.hdc_approver_user_id
+        if level == 'division':
+            parent = department.parent_id
+            while parent and (parent.hdc_unit_type or '') not in ('department', 'management'):
+                parent = parent.parent_id
+            return parent.hdc_approver_user_id if parent else self.env['res.users']
+        current = department
+        while current:
+            if (current.name or '').strip().lower() == 'гүйцэтгэх захирал':
+                return current.hdc_approver_user_id or current.manager_id.user_id
+            current = current.parent_id
+        executive = self.env['hr.department'].sudo().search([('name', '=', 'Гүйцэтгэх захирал'), ('active', '=', True)], limit=1)
+        return executive.hdc_approver_user_id or executive.manager_id.user_id
+
+    def _next_level(self, level):
+        return {'department': 'division', 'division': 'executive'}.get(level)
+
+    def _schedule_approval_activity(self):
+        for rec in self:
+            if rec.approver_user_id:
+                rec.activity_schedule('mail.mail_activity_data_todo', user_id=rec.approver_user_id.id, summary=_('Ажилтны хүсэлт батлах'), note=_('%s ажилтны %s хүсэлт таны батлах шатанд ирлээ.') % (rec.employee_id.name, dict(REQUEST_TYPES).get(rec.request_type)))
+
     def action_submit(self):
         for rec in self:
             if rec.employee_id.user_id != self.env.user:
                 raise UserError(_('Зөвхөн өөрийн хүсэлтийг илгээх боломжтой.'))
             if rec.state not in ('draft', 'rejected'):
                 raise UserError(_('Зөвхөн ноорог эсвэл буцаасан хүсэлтийг илгээх боломжтой.'))
-            approver = rec.department_id.hdc_approver_user_id
+            first_level = 'department'
+            final_level = rec._approval_level_for_request()
+            approver = rec._approver_for_level(first_level)
             if not approver:
-                raise UserError(_('Таны нэгж дээр "Нэгжийн удирдлага" тохируулаагүй байна.'))
+                raise UserError(_('Таны хэлтсийн батлагч тохируулагдаагүй байна.'))
             if approver == self.env.user:
                 raise UserError(_('Өөрийн хүсэлтийг өөрөө батлах боломжгүй. Дээд шатны батлагч тохируулна уу.'))
 
@@ -122,18 +162,15 @@ class HdcEmployeeRequest(models.Model):
             rec.write({
                 'state': 'submitted',
                 'approver_user_id': approver.id,
+                'current_approval_level': first_level,
+                'final_approval_level': final_level,
                 'submitted_at': fields.Datetime.now(),
                 'approved_at': False,
                 'rejected_at': False,
                 'decision_note': False,
             })
-            rec.activity_schedule(
-                'mail.mail_activity_data_todo',
-                user_id=approver.id,
-                summary=_('Ажилтны хүсэлт батлах'),
-                note=_('%s ажилтны %s хүсэлт ирлээ.') % (rec.employee_id.name, dict(REQUEST_TYPES).get(rec.request_type)),
-            )
-            rec.message_post(body=_('Хүсэлт нэгжийн удирдлага %s руу илгээгдлээ.') % approver.name)
+            rec._schedule_approval_activity()
+            rec.message_post(body=_('Хүсэлт %s руу илгээгдлээ.') % approver.name)
 
     def _check_approver(self):
         for rec in self:
@@ -153,13 +190,21 @@ class HdcEmployeeRequest(models.Model):
         for rec in self:
             if rec.state != 'submitted':
                 raise UserError(_('Зөвхөн удирдлагад илгээсэн хүсэлтийг батална.'))
-            rec.write({'state': 'approved', 'approved_at': fields.Datetime.now()})
+            old_approver = rec.approver_user_id
+            old_level = rec.current_approval_level
             rec._close_approver_activities()
-            rec.message_post(body=_('Хүсэлт батлагдлаа.'))
-            rec._notify_employee(
-                _('Таны хүсэлт батлагдлаа'),
-                _('%s хүсэлт тань нэгжийн удирдлагаар батлагдлаа.') % dict(REQUEST_TYPES).get(rec.request_type),
-            )
+            if old_level == rec.final_approval_level:
+                rec.write({'state': 'approved', 'approved_at': fields.Datetime.now(), 'approver_user_id': False})
+                rec.message_post(body=_('%s баталж, хүсэлт эцэслэн батлагдлаа.') % old_approver.name)
+                rec._notify_employee(_('Таны хүсэлт батлагдлаа'), _('%s хүсэлт тань эцэслэн батлагдлаа.') % dict(REQUEST_TYPES).get(rec.request_type))
+                continue
+            next_level = rec._next_level(old_level)
+            next_approver = rec._approver_for_level(next_level)
+            if not next_approver:
+                raise UserError(_('Дараагийн шатны батлагч тохируулагдаагүй байна.'))
+            rec.write({'current_approval_level': next_level, 'approver_user_id': next_approver.id})
+            rec.message_post(body=_('%s батлав. Хүсэлт дараагийн шатны %s руу шилжлээ.') % (old_approver.name, next_approver.name))
+            rec._schedule_approval_activity()
 
     def action_reject(self):
         self._check_approver()
@@ -188,6 +233,8 @@ class HdcEmployeeRequest(models.Model):
             rec.write({
                 'state': 'draft',
                 'approver_user_id': False,
+                'current_approval_level': False,
+                'final_approval_level': False,
                 'decision_note': False,
             })
             rec.message_post(body=_('Хүсэлтийг засварлахаар ноорог төлөвт шилжүүллээ.'))
