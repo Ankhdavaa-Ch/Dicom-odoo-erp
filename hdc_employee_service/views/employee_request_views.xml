@@ -7,7 +7,7 @@
             <list string="Хүсэлт, санал" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-info="state == 'submitted'">
                 <field name="name"/><field name="employee_id"/><field name="request_type"/>
                 <field name="date_from"/><field name="date_to"/><field name="duration_display"/>
-                <field name="approver_user_id"/><field name="state" widget="badge"/>
+                <field name="current_approval_level"/><field name="approver_user_id"/><field name="final_approval_level"/><field name="state" widget="badge"/>
             </list>
         </field>
     </record>
@@ -37,7 +37,9 @@
                             <field name="duration_display" readonly="1"/>
                         </group>
                         <group>
+                            <field name="current_approval_level" readonly="1"/>
                             <field name="approver_user_id" readonly="1"/>
+                            <field name="final_approval_level" readonly="1"/>
                             <field name="submitted_at" readonly="1"/>
                             <field name="approved_at" readonly="1" invisible="state != 'approved'"/>
                             <field name="rejected_at" readonly="1" invisible="state != 'rejected'"/>
@@ -65,11 +67,19 @@
         <field name="context">{}</field>
     </record>
 
-    <record id="action_hdc_requests_to_approve" model="ir.actions.act_window">
-        <field name="name">Нэгжийн хүсэлтүүд</field>
+    <record id="action_hdc_all_unit_requests" model="ir.actions.act_window">
+        <field name="name">Нийт хүсэлтүүд</field>
         <field name="res_model">hdc.employee.request</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('approver_user_id', '=', uid), ('state', 'in', ['submitted', 'approved', 'rejected'])]</field>
-        <field name="context">{'create': False, 'search_default_waiting': 1}</field>
+        <field name="domain">[('department_id', 'child_of', user.employee_id.department_id.id)]</field>
+        <field name="context">{'create': False}</field>
+    </record>
+
+    <record id="action_hdc_requests_to_approve" model="ir.actions.act_window">
+        <field name="name">Батлах хүсэлтүүд</field>
+        <field name="res_model">hdc.employee.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('approver_user_id', '=', uid), ('state', '=', 'submitted')]</field>
+        <field name="context">{'create': False}</field>
     </record>
 </odoo>
