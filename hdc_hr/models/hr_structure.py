@@ -120,34 +120,32 @@ class HdcHrStructure(models.Model):
                     node = Node.with_context(skip_hdc_department_sync=True).create(values)
                 node_by_department[department.id] = node
 
-            # DICOM chart rule: these units report directly to the National Committee
-            # and therefore appear on the same level in the organization chart.
-            finance_office = departments.filtered(
-                lambda d: (d.name or '').strip().lower() == 'санхүү бүртгэлийн алба'
+            # DICOM chart rule: these three units report directly to the Executive Director.
+            executive = departments.filtered(
+                lambda d: (d.name or '').strip().lower() == 'гүйцэтгэх захирал'
             )[:1]
-            chief_economist = departments.filtered(
-                lambda d: (d.name or '').strip().lower() == 'ерөнхий эдийн засагч'
-            )[:1]
+            direct_reports = {
+                'ерөнхий эдийн засагч': 'management',
+                'ажлын алба': 'office',
+                'санхүү бүртгэлийн алба': 'office',
+            }
 
-            if finance_office and finance_office.parent_id != root:
-                finance_office.with_context(skip_hdc_structure_sync=True).write({
-                    'parent_id': root.id,
-                    'hdc_unit_type': 'office',
-                })
-            if chief_economist and chief_economist.parent_id != root:
-                chief_economist.with_context(skip_hdc_structure_sync=True).write({
-                    'parent_id': root.id,
-                    'hdc_unit_type': 'management',
-                })
+            if executive:
+                for department in departments:
+                    normalized_name = (department.name or '').strip().lower()
+                    if normalized_name in direct_reports and department.parent_id != executive:
+                        department.with_context(skip_hdc_structure_sync=True).write({
+                            'parent_id': executive.id,
+                            'hdc_unit_type': direct_reports[normalized_name],
+                        })
 
             for department in departments:
                 node = node_by_department[department.id]
+                normalized_name = (department.name or '').strip().lower()
+                is_direct_report = bool(executive and normalized_name in direct_reports)
 
-                is_finance_office = bool(finance_office and department.id == finance_office.id)
-                is_chief_economist = bool(chief_economist and department.id == chief_economist.id)
-
-                if is_finance_office or is_chief_economist:
-                    parent_node = node_by_department.get(root.id)
+                if is_direct_report:
+                    parent_node = node_by_department.get(executive.id)
                 else:
                     parent_node = (
                         node_by_department.get(department.parent_id.id)
@@ -156,11 +154,7 @@ class HdcHrStructure(models.Model):
 
                 node.with_context(skip_hdc_department_sync=True).write({
                     'parent_id': parent_node.id if parent_node else False,
-                    'node_type': (
-                        'office' if is_finance_office
-                        else 'management' if is_chief_economist
-                        else node.node_type
-                    ),
+                    'node_type': direct_reports.get(normalized_name, node.node_type),
                 })
 
         return {
