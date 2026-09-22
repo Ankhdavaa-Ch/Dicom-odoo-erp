@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_hdc_unit_manager" model="res.groups">
+        <field name="name">Нэгжийн удирдлага</field>
+        <field name="implied_ids" eval="[(4, ref('hdc_employee_service.group_hdc_employee_service_user'))]"/>
+    </record>
+</odoo>
