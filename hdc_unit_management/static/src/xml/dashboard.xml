@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hdc_unit_management.Dashboard">
+        <div class="hdc_unit_dashboard">
+            <t t-if="state.loading">
+                <div class="text-center p-5">Уншиж байна...</div>
+            </t>
+            <t t-else="">
+                <div class="hdc_unit_header">
+                    <div>
+                        <h2>Нэгжийн удирдлага</h2>
+                        <div class="text-muted" t-esc="state.data.department_name"/>
+                    </div>
+                </div>
+
+                <div class="hdc_unit_kpis">
+                    <button class="hdc_unit_kpi" t-on-click="openAnnualLeave">
+                        <span class="hdc_unit_kpi_icon fa fa-calendar-check-o"/>
+                        <span class="hdc_unit_kpi_body">
+                            <strong t-esc="state.data.counts.annual_leave"/>
+                            <small>Ээлжийн амралттай</small>
+                        </span>
+                    </button>
+                    <button class="hdc_unit_kpi" t-on-click="openPending">
+                        <span class="hdc_unit_kpi_icon fa fa-check-square-o"/>
+                        <span class="hdc_unit_kpi_body">
+                            <strong t-esc="state.data.counts.pending"/>
+                            <small>Батлах хүсэлтүүд</small>
+                        </span>
+                    </button>
+                    <button class="hdc_unit_kpi" t-on-click="openLate">
+                        <span class="hdc_unit_kpi_icon fa fa-clock-o"/>
+                        <span class="hdc_unit_kpi_body">
+                            <strong t-esc="state.data.counts.late"/>
+                            <small>Хоцролттой ажилтнууд</small>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="hdc_unit_panel">
+                    <div class="hdc_unit_panel_header">
+                        <h4>Нийт хүсэлтүүд</h4>
+                        <button class="btn btn-link" t-on-click="openAllRequests">Бүгдийг харах</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr><th>Хүсэлт</th><th>Ажилтан</th><th>Нэгж</th><th>Төрөл</th><th>Одоогийн шат</th><th>Одоогийн батлагч</th><th>Төлөв</th></tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.data.recent_requests" t-as="req" t-key="req.id">
+                                    <tr>
+                                        <td><a href="#" t-on-click.prevent="() => this.openRequests([req.id], req.name)" t-esc="req.name"/></td>
+                                        <td t-esc="req.employee"/>
+                                        <td t-esc="req.department"/>
+                                        <td t-esc="req.request_type"/>
+                                        <td t-esc="req.current_level"/>
+                                        <td t-esc="req.approver"/>
+                                        <td><span class="badge rounded-pill text-bg-light" t-esc="req.state"/></td>
+                                    </tr>
+                                </t>
+                                <tr t-if="!state.data.recent_requests.length">
+                                    <td colspan="7" class="text-center text-muted py-4">Хүсэлт алга байна.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>
