@@ -13,6 +13,7 @@
         'hdc_attendance',
         'hdc_erp_base',
         'hdc_employee_service',
+        'hdc_unit_management',
     ],
     'data': [
         'security/system_roles.xml',
