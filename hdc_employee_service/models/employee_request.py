@@ -112,25 +112,47 @@ class HdcEmployeeRequest(models.Model):
             return 'department' if self.duration_minutes < 24 * 60 else 'division'
         return 'department'
 
+    def _department_approver(self, department):
+        """Resolve a unit manager from either the explicit approver or Odoo's department manager."""
+        if not department:
+            return self.env['res.users']
+        return department.hdc_approver_user_id or department.manager_id.user_id
+
     def _approver_for_level(self, level):
         self.ensure_one()
         department = self.department_id
         if not department:
             return self.env['res.users']
+
         if level == 'department':
-            return department.hdc_approver_user_id
+            # Employee may belong directly to a Газар. In that case its manager is already
+            # the газрын захирал, so use the current unit manager instead of requiring a
+            # non-existent хэлтсийн manager.
+            return self._department_approver(department)
+
         if level == 'division':
-            parent = department.parent_id
-            while parent and (parent.hdc_unit_type or '') not in ('department', 'management'):
-                parent = parent.parent_id
-            return parent.hdc_approver_user_id if parent else self.env['res.users']
+            # Find the nearest parent Газар. hdc_unit_type='department' means Газар.
+            current = department
+            if current.hdc_unit_type == 'department':
+                return self._department_approver(current)
+            current = current.parent_id
+            while current:
+                if current.hdc_unit_type == 'department' or (current.name or '').strip().lower().endswith(' газар'):
+                    return self._department_approver(current)
+                current = current.parent_id
+            return self.env['res.users']
+
+        # Executive director: walk upward first, then fall back to the named CEO unit.
         current = department
         while current:
             if (current.name or '').strip().lower() == 'гүйцэтгэх захирал':
-                return current.hdc_approver_user_id or current.manager_id.user_id
+                return self._department_approver(current)
             current = current.parent_id
-        executive = self.env['hr.department'].sudo().search([('name', '=', 'Гүйцэтгэх захирал'), ('active', '=', True)], limit=1)
-        return executive.hdc_approver_user_id or executive.manager_id.user_id
+        executive = self.env['hr.department'].sudo().search([
+            ('name', '=', 'Гүйцэтгэх захирал'),
+            ('active', '=', True),
+        ], limit=1)
+        return self._department_approver(executive)
 
     def _next_level(self, level):
         return {'department': 'division', 'division': 'executive'}.get(level)
