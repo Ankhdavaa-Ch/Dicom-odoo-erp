@@ -71,7 +71,7 @@
         <field name="name">Нийт хүсэлтүүд</field>
         <field name="res_model">hdc.employee.request</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('department_id', 'child_of', user.employee_id.department_id.id)]</field>
+        <field name="domain">[]</field>
         <field name="context">{'create': False}</field>
     </record>
 
