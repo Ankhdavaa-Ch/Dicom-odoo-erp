@@ -42,6 +42,8 @@ class HdcEmployeeRequest(models.Model):
     approver_user_id = fields.Many2one('res.users', string='Одоогийн батлагч', readonly=True, tracking=True)
     current_approval_level = fields.Selection([('department', 'Хэлтсийн захирал'), ('division', 'Газрын захирал'), ('executive', 'Гүйцэтгэх захирал')], string='Одоогийн батлах шат', readonly=True, tracking=True)
     final_approval_level = fields.Selection([('department', 'Хэлтсийн захирал'), ('division', 'Газрын захирал'), ('executive', 'Гүйцэтгэх захирал')], string='Эцсийн батлах шат', readonly=True, tracking=True)
+    workflow_id = fields.Many2one('hdc.approval.workflow', string='Ажлын урсгал', readonly=True)
+    workflow_step_id = fields.Many2one('hdc.approval.workflow.step', string='Одоогийн шат', readonly=True, tracking=True)
     date_from = fields.Datetime(string='Эхлэх огноо, цаг', required=True, tracking=True)
     date_to = fields.Datetime(string='Дуусах огноо, цаг', required=True, tracking=True)
     duration_minutes = fields.Integer(string='Нийт минут', compute='_compute_duration', store=True)
@@ -103,6 +105,25 @@ class HdcEmployeeRequest(models.Model):
                 summary=summary,
                 note=note,
             )
+
+    def _configured_workflow(self):
+        self.ensure_one()
+        return self.env['hdc.approval.workflow'].sudo().search([
+            ('request_type', '=', self.request_type),
+            ('active', '=', True),
+        ], limit=1)
+
+    def _workflow_approver(self, step):
+        self.ensure_one()
+        if step.approver_type == 'user':
+            return step.approver_user_id
+        return self._approver_for_level(step.approver_type)
+
+    def _next_workflow_step(self, step):
+        self.ensure_one()
+        return self.workflow_id.step_ids.filtered(
+            lambda s: (s.sequence, s.id) > (step.sequence, step.id)
+        ).sorted(lambda s: (s.sequence, s.id))[:1]
 
     def _approval_level_for_request(self):
         self.ensure_one()
@@ -168,9 +189,11 @@ class HdcEmployeeRequest(models.Model):
                 raise UserError(_('Зөвхөн өөрийн хүсэлтийг илгээх боломжтой.'))
             if rec.state not in ('draft', 'rejected'):
                 raise UserError(_('Зөвхөн ноорог эсвэл буцаасан хүсэлтийг илгээх боломжтой.'))
-            first_level = 'department'
+            workflow = rec._configured_workflow()
+            first_step = workflow.step_ids.sorted(lambda s: (s.sequence, s.id))[:1] if workflow else False
+            first_level = first_step.approver_type if first_step and first_step.approver_type != 'user' else 'department'
             final_level = rec._approval_level_for_request()
-            approver = rec._approver_for_level(first_level)
+            approver = rec._workflow_approver(first_step) if first_step else rec._approver_for_level(first_level)
             if not approver:
                 raise UserError(_('Таны хэлтсийн батлагч тохируулагдаагүй байна.'))
             if approver == self.env.user:
@@ -186,6 +209,8 @@ class HdcEmployeeRequest(models.Model):
                 'approver_user_id': approver.id,
                 'current_approval_level': first_level,
                 'final_approval_level': final_level,
+                'workflow_id': workflow.id if workflow else False,
+                'workflow_step_id': first_step.id if first_step else False,
                 'submitted_at': fields.Datetime.now(),
                 'approved_at': False,
                 'rejected_at': False,
@@ -215,6 +240,23 @@ class HdcEmployeeRequest(models.Model):
             old_approver = rec.approver_user_id
             old_level = rec.current_approval_level
             rec._close_approver_activities()
+            if rec.workflow_step_id:
+                current_step = rec.workflow_step_id
+                next_step = rec._next_workflow_step(current_step)
+                if current_step.approve_finish or not next_step:
+                    rec.write({'state': 'approved', 'approved_at': fields.Datetime.now(), 'approver_user_id': False})
+                    rec.message_post(body=_('%s баталж, хүсэлт эцэслэн батлагдлаа.') % old_approver.name)
+                    rec._notify_employee(_('Таны хүсэлт батлагдлаа'), _('%s хүсэлт тань эцэслэн батлагдлаа.') % dict(REQUEST_TYPES).get(rec.request_type))
+                    continue
+                next_approver = rec._workflow_approver(next_step)
+                if not next_approver:
+                    raise UserError(_('Ажлын урсгалын "%s" шатны батлагч олдсонгүй.') % next_step.name)
+                next_level = next_step.approver_type if next_step.approver_type != 'user' else old_level
+                rec.write({'workflow_step_id': next_step.id, 'current_approval_level': next_level, 'approver_user_id': next_approver.id})
+                rec.message_post(body=_('%s батлав. Хүсэлт "%s" шат руу шилжлээ.') % (old_approver.name, next_step.name))
+                rec._schedule_approval_activity()
+                continue
+
             if old_level == rec.final_approval_level:
                 rec.write({'state': 'approved', 'approved_at': fields.Datetime.now(), 'approver_user_id': False})
                 rec.message_post(body=_('%s баталж, хүсэлт эцэслэн батлагдлаа.') % old_approver.name)
@@ -257,6 +299,8 @@ class HdcEmployeeRequest(models.Model):
                 'approver_user_id': False,
                 'current_approval_level': False,
                 'final_approval_level': False,
+                'workflow_id': False,
+                'workflow_step_id': False,
                 'decision_note': False,
             })
             rec.message_post(body=_('Хүсэлтийг засварлахаар ноорог төлөвт шилжүүллээ.'))
