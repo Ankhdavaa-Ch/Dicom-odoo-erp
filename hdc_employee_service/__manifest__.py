@@ -10,10 +10,12 @@
         'security/employee_service_security.xml',
         'security/ir.model.access.csv',
         'security/employee_request_rules.xml',
+        'data/approval_workflow_data.xml',
         'data/employee_request_sequence.xml',
         'views/my_profile_views.xml',
         'views/hr_department_views.xml',
         'views/employee_request_views.xml',
+        'views/approval_workflow_views.xml',
         'views/employee_service_menu.xml',
     ],
     'assets': {
