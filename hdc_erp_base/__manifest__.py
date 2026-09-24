@@ -19,6 +19,13 @@
         'views/erp_menu.xml',
     ],
 
+    'assets': {
+        'web.assets_backend': [
+            'hdc_erp_base/static/src/js/form_navigation.js',
+            'hdc_erp_base/static/src/xml/form_buttons.xml',
+        ],
+    },
+
     'installable': True,
     'application': True,
 }
