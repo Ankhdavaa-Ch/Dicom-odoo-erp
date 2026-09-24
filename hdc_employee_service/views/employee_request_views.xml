@@ -4,7 +4,7 @@
         <field name="name">hdc.employee.request.list</field>
         <field name="model">hdc.employee.request</field>
         <field name="arch" type="xml">
-            <list string="Хүсэлт, санал" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-info="state == 'submitted'">
+            <list string="Хүсэлт, санал" create="1" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-info="state == 'submitted'">
                 <field name="name"/><field name="employee_id"/><field name="request_type"/>
                 <field name="date_from"/><field name="date_to"/><field name="duration_display"/>
                 <field name="current_approval_level"/><field name="approver_user_id"/><field name="final_approval_level"/><field name="state" widget="badge"/>
@@ -64,7 +64,7 @@
         <field name="res_model">hdc.employee.request</field>
         <field name="view_mode">list,form</field>
         <field name="domain">[('employee_id.user_id', '=', uid)]</field>
-        <field name="context">{}</field>
+        <field name="context">{'create': True}</field>
     </record>
 
     <record id="action_hdc_all_unit_requests" model="ir.actions.act_window">
