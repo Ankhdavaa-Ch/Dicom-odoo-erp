@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hdc_approval_workflow_list" model="ir.ui.view">
+        <field name="name">hdc.approval.workflow.list</field>
+        <field name="model">hdc.approval.workflow</field>
+        <field name="arch" type="xml">
+            <list string="Ажлын урсгал">
+                <field name="name"/>
+                <field name="request_type"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_hdc_approval_workflow_form" model="ir.ui.view">
+        <field name="name">hdc.approval.workflow.form</field>
+        <field name="model">hdc.approval.workflow</field>
+        <field name="arch" type="xml">
+            <form string="Ажлын урсгал">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="request_type"/>
+                        <field name="active"/>
+                    </group>
+                    <separator string="Батлах шатууд"/>
+                    <field name="step_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="name"/>
+                            <field name="approver_type"/>
+                            <field name="approver_user_id" invisible="approver_type != 'user'"/>
+                            <field name="approve_finish"/>
+                            <field name="reject_to_draft"/>
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hdc_approval_workflow" model="ir.actions.act_window">
+        <field name="name">Ажлын урсгал</field>
+        <field name="res_model">hdc.approval.workflow</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
