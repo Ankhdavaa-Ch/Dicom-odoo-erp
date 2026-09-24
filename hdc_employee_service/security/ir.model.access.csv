@@ -1,2 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_hdc_employee_request_user,HDC employee request user,model_hdc_employee_request,hdc_employee_service.group_hdc_employee_service_user,1,1,1,0
+access_hdc_approval_workflow_admin,HDC approval workflow admin,model_hdc_approval_workflow,base.group_system,1,1,1,1
+access_hdc_approval_workflow_step_admin,HDC approval workflow step admin,model_hdc_approval_workflow_step,base.group_system,1,1,1,1
