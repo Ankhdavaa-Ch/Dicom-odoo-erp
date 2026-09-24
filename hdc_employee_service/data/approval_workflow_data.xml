@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="workflow_leave" model="hdc.approval.workflow">
+        <field name="name">Чөлөөний хүсэлт</field>
+        <field name="request_type">leave</field>
+    </record>
+    <record id="workflow_leave_department" model="hdc.approval.workflow.step">
+        <field name="workflow_id" ref="workflow_leave"/>
+        <field name="sequence">10</field>
+        <field name="name">Хэлтсийн захирал</field>
+        <field name="approver_type">department</field>
+    </record>
+    <record id="workflow_leave_division" model="hdc.approval.workflow.step">
+        <field name="workflow_id" ref="workflow_leave"/>
+        <field name="sequence">20</field>
+        <field name="name">Газрын захирал</field>
+        <field name="approver_type">division</field>
+        <field name="approve_finish" eval="True"/>
+    </record>
+
+    <record id="workflow_annual_leave" model="hdc.approval.workflow">
+        <field name="name">Ээлжийн амралт</field>
+        <field name="request_type">annual_leave</field>
+    </record>
+    <record id="workflow_annual_department" model="hdc.approval.workflow.step">
+        <field name="workflow_id" ref="workflow_annual_leave"/>
+        <field name="sequence">10</field>
+        <field name="name">Хэлтсийн захирал</field>
+        <field name="approver_type">department</field>
+    </record>
+    <record id="workflow_annual_division" model="hdc.approval.workflow.step">
+        <field name="workflow_id" ref="workflow_annual_leave"/>
+        <field name="sequence">20</field>
+        <field name="name">Газрын захирал</field>
+        <field name="approver_type">division</field>
+    </record>
+    <record id="workflow_annual_executive" model="hdc.approval.workflow.step">
+        <field name="workflow_id" ref="workflow_annual_leave"/>
+        <field name="sequence">30</field>
+        <field name="name">Гүйцэтгэх захирал</field>
+        <field name="approver_type">executive</field>
+        <field name="approve_finish" eval="True"/>
+    </record>
+</odoo>
