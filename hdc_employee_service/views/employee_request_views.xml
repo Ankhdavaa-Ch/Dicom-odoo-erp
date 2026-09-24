@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="action_hdc_new_request" model="ir.actions.act_window">
+        <field name="name">Шинэ хүсэлт</field>
+        <field name="res_model">hdc.employee.request</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+        <field name="context">{'form_view_initial_mode': 'edit'}</field>
+    </record>
+
     <record id="view_hdc_employee_request_list" model="ir.ui.view">
         <field name="name">hdc.employee.request.list</field>
         <field name="model">hdc.employee.request</field>
         <field name="arch" type="xml">
             <list string="Хүсэлт, санал" create="1" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-info="state == 'submitted'">
+                <header>
+                    <button name="%(action_hdc_new_request)d" type="action" string="+ Шинэ хүсэлт" class="btn-primary" display="always"/>
+                </header>
                 <field name="name"/><field name="employee_id"/><field name="request_type"/>
                 <field name="date_from"/><field name="date_to"/><field name="duration_display"/>
                 <field name="current_approval_level"/><field name="approver_user_id"/><field name="final_approval_level"/><field name="state" widget="badge"/>
