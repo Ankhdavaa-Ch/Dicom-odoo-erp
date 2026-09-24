@@ -57,6 +57,19 @@ class ResUsers(models.Model):
                 groups |= group
         return groups
 
+    def _hdc_role_implied_groups(self, role):
+        """Return all module groups inherited by a system role, recursively."""
+        result = self.env['res.groups']
+        pending = role.implied_ids
+        while pending:
+            group = pending[0]
+            pending -= group
+            if group in result:
+                continue
+            result |= group
+            pending |= group.implied_ids - result
+        return result
+
     def _apply_hdc_role(self):
         system_roles = self._hdc_system_role_groups()
         for user in self:
@@ -64,6 +77,10 @@ class ResUsers(models.Model):
             groups |= self.env.ref('base.group_user')
             if user.hdc_role_id:
                 groups |= user.hdc_role_id
+                # Store inherited module groups explicitly on the user as well.
+                # This makes ACL/create/write checks effective immediately and
+                # avoids relying on a later implied-group recomputation.
+                groups |= user._hdc_role_implied_groups(user.hdc_role_id)
             user.with_context(skip_hdc_security=True).groups_id = [(6, 0, groups.ids)]
 
     @api.onchange('hdc_employee_id')
