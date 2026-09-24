@@ -30,7 +30,6 @@
                     <widget name="web_ribbon" title="Идэвхгүй" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/>
                     <field name="hdc_role_category_id" invisible="1"/>
-                    <field name="hdc_selectable_role_ids" invisible="1"/>
 
                     <div class="oe_title">
                         <label for="hdc_employee_id" string="Ажилтан"/>
