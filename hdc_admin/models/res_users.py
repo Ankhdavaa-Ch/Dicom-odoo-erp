@@ -22,12 +22,16 @@ class ResUsers(models.Model):
     hdc_role_id = fields.Many2one(
         'res.groups',
         string='Системийн дүр',
-        domain="[('category_id', '=', hdc_role_category_id)]",
+        domain="[('id', 'in', hdc_selectable_role_ids)]",
         help='Хэрэглэгчид олгосон үндсэн системийн дүр. Модулийн эрхүүд тухайн дүрээс автоматаар өвлөгдөнө.',
     )
     hdc_role_category_id = fields.Many2one(
         'ir.module.category',
         compute='_compute_hdc_role_category_id',
+    )
+    hdc_selectable_role_ids = fields.Many2many(
+        'res.groups',
+        compute='_compute_hdc_selectable_role_ids',
     )
 
     @api.depends('hdc_role_id')
@@ -40,6 +44,12 @@ class ResUsers(models.Model):
         category = self.env.ref('hdc_admin.module_category_hdc_roles', raise_if_not_found=False)
         for user in self:
             user.hdc_role_category_id = category
+
+    @api.depends_context('uid')
+    def _compute_hdc_selectable_role_ids(self):
+        roles = self._hdc_system_role_groups()
+        for user in self:
+            user.hdc_selectable_role_ids = roles
 
     def _hdc_system_role_groups(self):
         xmlids = [
