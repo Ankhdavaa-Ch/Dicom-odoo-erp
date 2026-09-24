@@ -70,6 +70,12 @@ class ResGroups(models.Model):
 
             role.with_context(skip_hdc_role_sync=True).implied_ids = [(6, 0, implied.ids)]
 
+            # Existing users with this role must receive changed module rights
+            # immediately (not only newly assigned users).
+            users = self.env['res.users'].sudo().search([('hdc_role_id', '=', role.id)])
+            if users:
+                users._apply_hdc_role()
+
     @api.model_create_multi
     def create(self, vals_list):
         groups = super().create(vals_list)
