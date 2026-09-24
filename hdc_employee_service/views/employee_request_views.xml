@@ -12,7 +12,7 @@
         <field name="name">hdc.employee.request.list</field>
         <field name="model">hdc.employee.request</field>
         <field name="arch" type="xml">
-            <list string="Хүсэлт, санал" create="1" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-info="state == 'submitted'">
+            <list string="Хүсэлт, санал" create="0" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-info="state == 'submitted'">
                 <header>
                     <button name="%(action_hdc_new_request)d" type="action" string="+ Шинэ хүсэлт" class="btn-primary" display="always"/>
                 </header>
