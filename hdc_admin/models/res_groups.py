@@ -12,6 +12,7 @@ ACCESS_LEVELS = [
 class ResGroups(models.Model):
     _inherit = 'res.groups'
 
+    hdc_is_system_role = fields.Boolean(string='ХДК системийн дүр', default=False, index=True)
     hdc_hr_access = fields.Selection(ACCESS_LEVELS, string='Хүний нөөц', default='none', required=True)
     hdc_attendance_access = fields.Selection(ACCESS_LEVELS, string='Ирц', default='none', required=True)
     hdc_employee_service_access = fields.Selection(ACCESS_LEVELS, string='Ажилтны үйлчилгээ', default='none', required=True)
