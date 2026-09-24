@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hdc_erp_base.FormStatusButtons" t-inherit="web.FormStatusIndicator" t-inherit-mode="extension">
+        <xpath expr="//button[contains(@class, 'o_form_button_save')]/i" position="replace">
+            <i class="fa fa-save me-1"/> Хадгалах
+        </xpath>
+        <xpath expr="//button[contains(@class, 'o_form_button_cancel')]/i" position="replace">
+            <i class="fa fa-times me-1"/> Өөрчлөлтийг цуцлах
+        </xpath>
+        <xpath expr="//button[contains(@class, 'o_form_button_save')]" position="attributes">
+            <attribute name="class">o_form_button_save btn btn-success btn-sm me-2</attribute>
+        </xpath>
+        <xpath expr="//button[contains(@class, 'o_form_button_cancel')]" position="attributes">
+            <attribute name="class">o_form_button_cancel btn btn-outline-secondary btn-sm</attribute>
+        </xpath>
+    </t>
+    <t t-name="hdc_erp_base.FormBackButton" t-inherit="web.FormView" t-inherit-mode="extension">
+        <xpath expr="//t[@t-set-slot='control-panel-status-indicator']" position="inside">
+            <button t-if="!env.inDialog" type="button" class="btn btn-outline-secondary btn-sm ms-2" t-on-click.stop="hdcBack">
+                <i class="fa fa-arrow-left me-1"/> Буцах
+            </button>
+        </xpath>
+    </t>
+</templates>
