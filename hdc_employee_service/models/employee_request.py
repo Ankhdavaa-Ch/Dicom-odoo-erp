@@ -62,12 +62,30 @@ class HdcEmployeeRequest(models.Model):
     rejected_at = fields.Datetime(string='Буцаасан огноо', readonly=True)
     decision_note = fields.Text(string='Шийдвэрийн тайлбар', tracking=True)
     can_edit_rejected = fields.Boolean(string='Буцаасан хүсэлтийг засах эрхтэй', compute='_compute_can_edit_rejected')
+    leave_pay_type = fields.Selection([
+        ('paid', 'Цалинтай'),
+        ('unpaid', 'Цалингүй'),
+    ], string='Чөлөөний нөхцөл', tracking=True)
+    requires_executive_leave_decision = fields.Boolean(
+        string='Гүйцэтгэх захирлын чөлөөний шийдвэр шаардлагатай',
+        compute='_compute_requires_executive_leave_decision',
+    )
 
     @api.depends('state', 'employee_id.user_id')
     def _compute_can_edit_rejected(self):
         current_user = self.env.user
         for rec in self:
             rec.can_edit_rejected = rec.state == 'rejected' and rec.employee_id.user_id == current_user
+
+    @api.depends('request_type', 'duration_minutes', 'state', 'current_approval_level')
+    def _compute_requires_executive_leave_decision(self):
+        for rec in self:
+            rec.requires_executive_leave_decision = (
+                rec.request_type == 'leave'
+                and rec.duration_minutes >= 8 * 60
+                and rec.state == 'submitted'
+                and rec.current_approval_level == 'executive'
+            )
 
     @api.depends('date_from', 'date_to')
     def _compute_duration(self):
@@ -137,7 +155,7 @@ class HdcEmployeeRequest(models.Model):
         if self.request_type == 'annual_leave':
             return 'executive'
         if self.request_type == 'leave':
-            return 'department' if self.duration_minutes < 24 * 60 else 'division'
+            return 'executive' if self.duration_minutes >= 8 * 60 else 'department'
         return 'department'
 
     def _department_approver(self, department):
@@ -222,6 +240,7 @@ class HdcEmployeeRequest(models.Model):
                 'approved_at': False,
                 'rejected_at': False,
                 'decision_note': False,
+                'leave_pay_type': False,
             })
             rec._schedule_approval_activity()
             rec.message_post(body=_('Хүсэлт %s руу илгээгдлээ.') % approver.name)
@@ -247,9 +266,28 @@ class HdcEmployeeRequest(models.Model):
             old_approver = rec.approver_user_id
             old_level = rec.current_approval_level
             rec._close_approver_activities()
+            if rec.request_type == 'leave' and rec.duration_minutes >= 8 * 60 and old_level == 'executive' and not rec.leave_pay_type:
+                raise UserError(_('8 цаг ба түүнээс дээш чөлөөг батлахын өмнө Цалинтай эсвэл Цалингүй нөхцөлийг сонгоно уу.'))
+
             if rec.workflow_step_id:
                 current_step = rec.workflow_step_id
                 next_step = rec._next_workflow_step(current_step)
+                # 8+ hour leave must always reach the Executive Director even if
+                # the configured leave workflow currently ends at an earlier stage.
+                if rec.request_type == 'leave' and rec.duration_minutes >= 8 * 60 and old_level != 'executive' and (current_step.approve_finish or not next_step):
+                    executive = rec._approver_for_level('executive')
+                    if not executive:
+                        raise UserError(_('Гүйцэтгэх захирлын батлагч тохируулагдаагүй байна.'))
+                    rec.write({
+                        'workflow_step_id': False,
+                        'current_approval_level': 'executive',
+                        'final_approval_level': 'executive',
+                        'approver_user_id': executive.id,
+                    })
+                    rec.message_post(body=_('%s батлав. 8 цаг ба түүнээс дээш чөлөө тул хүсэлт Гүйцэтгэх захирал руу шилжлээ.') % old_approver.name)
+                    rec._schedule_approval_activity()
+                    continue
+
                 if current_step.approve_finish or not next_step:
                     rec.write({'state': 'approved', 'approved_at': fields.Datetime.now(), 'approver_user_id': False})
                     rec.message_post(body=_('%s баталж, хүсэлт эцэслэн батлагдлаа.') % old_approver.name)
