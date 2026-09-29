@@ -80,11 +80,10 @@ class HdcEmployeeRequest(models.Model):
     @api.depends('request_type', 'duration_minutes', 'state', 'current_approval_level')
     def _compute_requires_executive_leave_decision(self):
         for rec in self:
-            rec.requires_executive_leave_decision = (
-                rec.request_type == 'leave'
-                and rec.duration_minutes >= 8 * 60
-                and rec.state == 'submitted'
-                and rec.current_approval_level == 'executive'
+            rec.requires_executive_leave_decision = bool(
+                rec.state == 'submitted'
+                and rec.workflow_step_id
+                and rec.workflow_step_id.require_leave_pay_type
             )
 
     @api.depends('date_from', 'date_to')
