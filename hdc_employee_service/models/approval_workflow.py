@@ -37,6 +37,19 @@ class HdcApprovalWorkflowStep(models.Model):
     approver_user_id = fields.Many2one('res.users', string='Тодорхой батлагч', domain=[('share', '=', False)])
     approve_finish = fields.Boolean(string='Баталбал дуусгах', help='Идэвхтэй бол энэ шат батлагдахад хүсэлт эцэслэн батлагдана.')
     reject_to_draft = fields.Boolean(string='Буцаавал ажилтанд', default=True)
+    min_duration_hours = fields.Float(
+        string='Доод хугацаа (цаг)',
+        default=0.0,
+        help='Хүсэлтийн хугацаа энэ утгад хүрсэн үед уг шат оролцоно. 0 бол бүх хугацаанд оролцоно.',
+    )
+    require_leave_pay_type = fields.Boolean(
+        string='Цалинтай/цалингүй сонгох',
+        help='Энэ шатанд чөлөө батлахын өмнө Цалинтай эсвэл Цалингүй нөхцөл заавал сонгоно.',
+    )
+
+    def applies_to_request(self, request):
+        self.ensure_one()
+        return request.duration_minutes >= int((self.min_duration_hours or 0.0) * 60)
 
     @api.constrains('approver_type', 'approver_user_id')
     def _check_specific_user(self):
