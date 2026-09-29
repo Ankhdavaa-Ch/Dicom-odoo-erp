@@ -61,6 +61,13 @@ class HdcEmployeeRequest(models.Model):
     approved_at = fields.Datetime(string='Баталсан огноо', readonly=True)
     rejected_at = fields.Datetime(string='Буцаасан огноо', readonly=True)
     decision_note = fields.Text(string='Шийдвэрийн тайлбар', tracking=True)
+    can_edit_rejected = fields.Boolean(string='Буцаасан хүсэлтийг засах эрхтэй', compute='_compute_can_edit_rejected')
+
+    @api.depends('state', 'employee_id.user_id')
+    def _compute_can_edit_rejected(self):
+        current_user = self.env.user
+        for rec in self:
+            rec.can_edit_rejected = rec.state == 'rejected' and rec.employee_id.user_id == current_user
 
     @api.depends('date_from', 'date_to')
     def _compute_duration(self):
