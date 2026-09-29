@@ -144,11 +144,17 @@ class HdcEmployeeRequest(models.Model):
             return step.approver_user_id
         return self._approver_for_level(step.approver_type)
 
-    def _next_workflow_step(self, step):
+    def _applicable_workflow_steps(self):
         self.ensure_one()
         return self.workflow_id.step_ids.filtered(
+            lambda step: step.applies_to_request(self)
+        ).sorted(lambda step: (step.sequence, step.id))
+
+    def _next_workflow_step(self, step):
+        self.ensure_one()
+        return self._applicable_workflow_steps().filtered(
             lambda s: (s.sequence, s.id) > (step.sequence, step.id)
-        ).sorted(lambda s: (s.sequence, s.id))[:1]
+        )[:1]
 
     def _approval_level_for_request(self):
         self.ensure_one()
@@ -215,7 +221,7 @@ class HdcEmployeeRequest(models.Model):
             if rec.state not in ('draft', 'rejected'):
                 raise UserError(_('Зөвхөн ноорог эсвэл буцаасан хүсэлтийг илгээх боломжтой.'))
             workflow = rec._configured_workflow()
-            first_step = workflow.step_ids.sorted(lambda s: (s.sequence, s.id))[:1] if workflow else False
+            first_step = rec._applicable_workflow_steps()[:1] if workflow else False
             first_level = first_step.approver_type if first_step and first_step.approver_type != 'user' else 'department'
             final_level = rec._approval_level_for_request()
             approver = rec._workflow_approver(first_step) if first_step else rec._approver_for_level(first_level)
@@ -266,28 +272,12 @@ class HdcEmployeeRequest(models.Model):
             old_approver = rec.approver_user_id
             old_level = rec.current_approval_level
             rec._close_approver_activities()
-            if rec.request_type == 'leave' and rec.duration_minutes >= 8 * 60 and old_level == 'executive' and not rec.leave_pay_type:
-                raise UserError(_('8 цаг ба түүнээс дээш чөлөөг батлахын өмнө Цалинтай эсвэл Цалингүй нөхцөлийг сонгоно уу.'))
+            if rec.workflow_step_id and rec.workflow_step_id.require_leave_pay_type and not rec.leave_pay_type:
+                raise UserError(_('Энэ шатанд батлахын өмнө Цалинтай эсвэл Цалингүй нөхцөлийг сонгоно уу.'))
 
             if rec.workflow_step_id:
                 current_step = rec.workflow_step_id
                 next_step = rec._next_workflow_step(current_step)
-                # 8+ hour leave must always reach the Executive Director even if
-                # the configured leave workflow currently ends at an earlier stage.
-                if rec.request_type == 'leave' and rec.duration_minutes >= 8 * 60 and old_level != 'executive' and (current_step.approve_finish or not next_step):
-                    executive = rec._approver_for_level('executive')
-                    if not executive:
-                        raise UserError(_('Гүйцэтгэх захирлын батлагч тохируулагдаагүй байна.'))
-                    rec.write({
-                        'workflow_step_id': False,
-                        'current_approval_level': 'executive',
-                        'final_approval_level': 'executive',
-                        'approver_user_id': executive.id,
-                    })
-                    rec.message_post(body=_('%s батлав. 8 цаг ба түүнээс дээш чөлөө тул хүсэлт Гүйцэтгэх захирал руу шилжлээ.') % old_approver.name)
-                    rec._schedule_approval_activity()
-                    continue
-
                 if current_step.approve_finish or not next_step:
                     rec.write({'state': 'approved', 'approved_at': fields.Datetime.now(), 'approver_user_id': False})
                     rec.message_post(body=_('%s баталж, хүсэлт эцэслэн батлагдлаа.') % old_approver.name)
