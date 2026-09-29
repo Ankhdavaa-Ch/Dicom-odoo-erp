@@ -30,6 +30,8 @@
                             <field name="name"/>
                             <field name="approver_type"/>
                             <field name="approver_user_id" invisible="approver_type != 'user'"/>
+                            <field name="min_duration_hours"/>
+                            <field name="require_leave_pay_type"/>
                             <field name="approve_finish"/>
                             <field name="reject_to_draft"/>
                         </list>
