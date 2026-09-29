@@ -36,6 +36,7 @@
                     <button name="action_cancel" type="object" string="Цуцлах" invisible="state not in ['draft', 'submitted'] or employee_id.user_id != uid"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,rejected,cancelled"/>
                     <field name="can_edit_rejected" invisible="1"/>
+                    <field name="requires_executive_leave_decision" invisible="1"/>
                 </header>
                 <sheet>
                     <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
@@ -52,6 +53,7 @@
                             <field name="current_approval_level" readonly="1"/>
                             <field name="approver_user_id" readonly="1"/>
                             <field name="final_approval_level" readonly="1"/>
+                            <field name="leave_pay_type" required="requires_executive_leave_decision" readonly="not requires_executive_leave_decision" invisible="request_type != 'leave' or duration_display == '00:00'"/>
                             <field name="submitted_at" readonly="1"/>
                             <field name="approved_at" readonly="1" invisible="state != 'approved'"/>
                             <field name="rejected_at" readonly="1" invisible="state != 'rejected'"/>
