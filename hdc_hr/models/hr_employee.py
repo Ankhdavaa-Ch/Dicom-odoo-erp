@@ -1,8 +1,20 @@
-from odoo import models, fields
+from odoo import api, models, fields
 
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Keep Odoo 18 employee creation safe when a custom/client view omits name.
+
+        Odoo's resource preparation expects the key to exist in every create vals.
+        We still reject a genuinely empty employee name with a clear message through
+        the standard required-field validation instead of crashing with KeyError.
+        """
+        for vals in vals_list:
+            vals.setdefault('name', False)
+        return super().create(vals_list)
 
     employee_code = fields.Char(
         string='Ажилтны код'
