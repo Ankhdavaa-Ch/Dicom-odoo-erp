@@ -70,16 +70,34 @@ class ResUsers(models.Model):
             pending |= group.implied_ids - result
         return result
 
+    def _hdc_managed_module_groups(self):
+        """Groups controlled exclusively by the HDC system-role matrix."""
+        xmlids = [
+            'hr.group_hr_user',
+            'hr.group_hr_manager',
+            'hdc_attendance.group_hdc_attendance_user',
+            'hdc_attendance.group_hdc_attendance_manager',
+            'hdc_employee_service.group_hdc_employee_service_user',
+            'hdc_unit_management.group_hdc_unit_manager',
+        ]
+        groups = self.env['res.groups']
+        for xmlid in xmlids:
+            group = self.env.ref(xmlid, raise_if_not_found=False)
+            if group:
+                groups |= group
+        return groups
+
     def _apply_hdc_role(self):
         system_roles = self._hdc_system_role_groups()
+        managed_module_groups = self._hdc_managed_module_groups()
         for user in self:
-            groups = user.groups_id - system_roles
+            # Remove BOTH old system roles and all HDC module groups first.
+            # Otherwise a permission changed to "none" remains directly stored
+            # on the user and its menu continues to be visible.
+            groups = user.groups_id - system_roles - managed_module_groups
             groups |= self.env.ref('base.group_user')
             if user.hdc_role_id:
                 groups |= user.hdc_role_id
-                # Store inherited module groups explicitly on the user as well.
-                # This makes ACL/create/write checks effective immediately and
-                # avoids relying on a later implied-group recomputation.
                 groups |= user._hdc_role_implied_groups(user.hdc_role_id)
             user.with_context(skip_hdc_security=True).groups_id = [(6, 0, groups.ids)]
 
