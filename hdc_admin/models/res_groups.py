@@ -17,6 +17,9 @@ class ResGroups(models.Model):
     hdc_attendance_access = fields.Selection(ACCESS_LEVELS, string='Ирц', default='none', required=True)
     hdc_employee_service_access = fields.Selection(ACCESS_LEVELS, string='Ажилтны үйлчилгээ', default='none', required=True)
     hdc_unit_management_access = fields.Selection(ACCESS_LEVELS, string='Нэгжийн удирдлага', default='none', required=True)
+    hdc_permission_ids = fields.One2many(
+        'hdc.role.permission', 'role_id', string='Нарийвчилсан эрх'
+    )
 
     def _is_hdc_system_role(self):
         category = self.env.ref('hdc_admin.module_category_hdc_roles', raise_if_not_found=False)
