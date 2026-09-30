@@ -11,7 +11,7 @@
     <menuitem id="menu_hdc_erp_root" name="ХДК ERP" action="action_hdc_erp_home" web_icon="hr,static/description/icon.png" sequence="5"/>
 
     <!-- ХҮНИЙ НӨӨЦ -->
-    <menuitem id="menu_hdc_erp_hr" name="Хүний нөөц" parent="menu_hdc_erp_root" action="action_hdc_erp_home" sequence="10"/>
+    <menuitem id="menu_hdc_erp_hr" name="Хүний нөөц" parent="menu_hdc_erp_root" action="action_hdc_erp_home" sequence="10" groups="hr.group_hr_user,hr.group_hr_manager"/>
     <menuitem id="menu_hdc_erp_employee" name="Ажилтнууд" parent="menu_hdc_erp_hr" action="action_hdc_erp_home" sequence="10"/>
 
     <record id="action_hdc_erp_department" model="ir.actions.act_window">
