@@ -21,6 +21,64 @@ class ResGroups(models.Model):
         'hdc.role.permission', 'role_id', string='Нарийвчилсан эрх'
     )
 
+    def _hdc_permission_catalog(self):
+        return [
+            ('hr', 'hr.employees', 'Ажилтнууд', 'menu', 10, None),
+            ('hr', 'hr.employees.read', 'Харах', 'action', 11, 'hr.employees'),
+            ('hr', 'hr.employees.create', 'Шинэ ажилтан', 'action', 12, 'hr.employees'),
+            ('hr', 'hr.employees.write', 'Засах', 'action', 13, 'hr.employees'),
+            ('hr', 'hr.departments', 'Газар / хэлтэс', 'menu', 20, None),
+            ('hr', 'hr.jobs', 'Албан тушаал', 'menu', 30, None),
+            ('hr', 'hr.organization', 'Байгууллагын бүтэц', 'menu', 40, None),
+            ('hr', 'hr.structure_setup', 'Бүтцийн тохиргоо', 'menu', 50, None),
+
+            ('attendance', 'attendance.daily', 'Өдрийн ирц', 'menu', 10, None),
+            ('attendance', 'attendance.daily.read', 'Харах', 'action', 11, 'attendance.daily'),
+            ('attendance', 'attendance.daily.work', 'Ирц боловсруулах', 'action', 12, 'attendance.daily'),
+            ('attendance', 'attendance.raw', 'Ирцийн бүртгэл', 'menu', 20, None),
+            ('attendance', 'attendance.raw.read', 'Харах', 'action', 21, 'attendance.raw'),
+            ('attendance', 'attendance.pull', 'Ирц татах', 'action', 30, None),
+            ('attendance', 'attendance.devices', 'Төхөөрөмжүүд', 'menu', 40, None),
+
+            ('employee_service', 'service.profile', 'Миний анкет', 'menu', 10, None),
+            ('employee_service', 'service.attendance', 'Миний ирц', 'menu', 20, None),
+            ('employee_service', 'service.requests', 'Миний хүсэлтүүд', 'menu', 30, None),
+            ('employee_service', 'service.requests.read', 'Харах', 'action', 31, 'service.requests'),
+            ('employee_service', 'service.requests.create', 'Шинэ хүсэлт', 'action', 32, 'service.requests'),
+            ('employee_service', 'service.requests.write', 'Засах', 'action', 33, 'service.requests'),
+            ('employee_service', 'service.requests.submit', 'Илгээх', 'action', 34, 'service.requests'),
+            ('employee_service', 'service.unit_requests', 'Нэгжийн хүсэлтүүд', 'menu', 40, None),
+            ('employee_service', 'service.unit_requests.approve', 'Батлах', 'action', 41, 'service.unit_requests'),
+            ('employee_service', 'service.unit_requests.reject', 'Буцаах', 'action', 42, 'service.unit_requests'),
+
+            ('unit_management', 'unit.dashboard', 'Хяналтын самбар', 'menu', 10, None),
+            ('unit_management', 'unit.all_requests', 'Нийт хүсэлтүүд', 'menu', 20, None),
+            ('unit_management', 'unit.pending_requests', 'Батлах хүсэлтүүд', 'menu', 30, None),
+            ('unit_management', 'unit.pending_requests.approve', 'Батлах', 'action', 31, 'unit.pending_requests'),
+            ('unit_management', 'unit.pending_requests.reject', 'Буцаах', 'action', 32, 'unit.pending_requests'),
+            ('unit_management', 'unit.employees', 'Нэгжийн ажилтнууд', 'menu', 40, None),
+            ('unit_management', 'unit.attendance', 'Ирцийн хяналт', 'menu', 50, None),
+        ]
+
+    def action_generate_hdc_permissions(self):
+        Permission = self.env['hdc.role.permission'].sudo()
+        for role in self:
+            existing = {p.code: p for p in role.hdc_permission_ids}
+            created = {}
+            for module, code, name, ptype, sequence, parent_code in role._hdc_permission_catalog():
+                parent = existing.get(parent_code) or created.get(parent_code)
+                values = {
+                    'role_id': role.id, 'module': module, 'code': code,
+                    'name': name, 'permission_type': ptype, 'sequence': sequence,
+                    'parent_id': parent.id if parent else False,
+                }
+                if code in existing:
+                    existing[code].write(values)
+                    created[code] = existing[code]
+                else:
+                    created[code] = Permission.create(values)
+        return True
+
     def _is_hdc_system_role(self):
         category = self.env.ref('hdc_admin.module_category_hdc_roles', raise_if_not_found=False)
         return bool(category and self.category_id == category)
