@@ -91,14 +91,15 @@ class ResUsers(models.Model):
         system_roles = self._hdc_system_role_groups()
         managed_module_groups = self._hdc_managed_module_groups()
         for user in self:
-            # Remove BOTH old system roles and all HDC module groups first.
-            # Otherwise a permission changed to "none" remains directly stored
-            # on the user and its menu continues to be visible.
+            # IMPORTANT: system-role groups themselves imply module groups.
+            # Therefore copying role.implied_ids back onto the user makes stale
+            # module permissions survive even after a module is changed to None.
+            # Keep only non-HDC direct groups, then add the selected role. Odoo
+            # resolves the role's CURRENT implied_ids dynamically.
             groups = user.groups_id - system_roles - managed_module_groups
             groups |= self.env.ref('base.group_user')
             if user.hdc_role_id:
                 groups |= user.hdc_role_id
-                groups |= user._hdc_role_implied_groups(user.hdc_role_id)
             user.with_context(skip_hdc_security=True).groups_id = [(6, 0, groups.ids)]
 
     @api.onchange('hdc_employee_id')
