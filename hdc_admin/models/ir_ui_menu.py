@@ -70,6 +70,6 @@ class IrUiMenu(models.Model):
         # reappear because one of its children has a readable action.
         if blocked:
             descendants = self.sudo().search([('id', 'child_of', list(blocked))])
-            visible -= set(descendants.ids)
+            visible -= descendants
 
         return visible
