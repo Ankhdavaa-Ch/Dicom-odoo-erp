@@ -66,10 +66,11 @@ class IrUiMenu(models.Model):
             if menu and code not in allowed_codes:
                 blocked.add(menu.id)
 
-        # Remove blocked menus and every descendant, so a hidden module cannot
-        # reappear because one of its children has a readable action.
+        # Never call ir.ui.menu.search() from _visible_menu_ids(): Odoo's
+        # search_fetch() calls _visible_menu_ids() again and causes recursion.
+        # The parent's visibility filtering is enough: load_menus only walks
+        # children of menus that remain visible.
         if blocked:
-            descendants = self.sudo().search([('id', 'child_of', list(blocked))])
-            visible -= descendants
+            visible -= self.browse(list(blocked))
 
         return visible
