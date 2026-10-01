@@ -71,6 +71,6 @@ class IrUiMenu(models.Model):
         # The parent's visibility filtering is enough: load_menus only walks
         # children of menus that remain visible.
         if blocked:
-            visible -= self.browse(list(blocked))
+            visible -= set(blocked)
 
         return visible
