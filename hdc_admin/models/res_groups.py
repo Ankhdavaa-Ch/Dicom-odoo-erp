@@ -137,6 +137,9 @@ class ResGroups(models.Model):
             if users:
                 users._apply_hdc_role()
 
+        # load_menus is cached per user. Base-right changes must invalidate it.
+        self.env.registry.clear_cache()
+
     @api.model_create_multi
     def create(self, vals_list):
         groups = super().create(vals_list)
