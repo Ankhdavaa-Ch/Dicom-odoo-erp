@@ -87,6 +87,38 @@ class ResUsers(models.Model):
                 groups |= group
         return groups
 
+    def _hdc_permission_allowed(self, code):
+        self.ensure_one()
+        role = self.hdc_role_id
+        if not role:
+            return False
+        permission = role.hdc_permission_ids.filtered(lambda p: p.code == code)[:1]
+        if not permission or not permission.allowed:
+            return False
+        module_field = {
+            'hr': 'hdc_hr_access',
+            'attendance': 'hdc_attendance_access',
+            'employee_service': 'hdc_employee_service_access',
+            'unit_management': 'hdc_unit_management_access',
+        }.get(permission.module)
+        return bool(module_field and getattr(role, module_field, 'none') != 'none')
+
+    def _hdc_allowed_permission_codes(self):
+        self.ensure_one()
+        role = self.hdc_role_id
+        if not role:
+            return set()
+        levels = {
+            'hr': role.hdc_hr_access,
+            'attendance': role.hdc_attendance_access,
+            'employee_service': role.hdc_employee_service_access,
+            'unit_management': role.hdc_unit_management_access,
+        }
+        return {
+            p.code for p in role.hdc_permission_ids
+            if p.allowed and levels.get(p.module, 'none') != 'none'
+        }
+
     def _apply_hdc_role(self):
         system_roles = self._hdc_system_role_groups()
         managed_module_groups = self._hdc_managed_module_groups()
