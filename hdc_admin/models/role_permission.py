@@ -45,7 +45,7 @@ class HdcRolePermission(models.Model):
         if users:
             users._apply_hdc_role()
         # Menu visibility is cached by Odoo; clear it so the saved rights are effective immediately.
-        self.env['ir.ui.menu'].clear_caches()
+        self.env.registry.clear_cache()
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -68,5 +68,5 @@ class HdcRolePermission(models.Model):
         users = self.env['res.users'].sudo().search([('hdc_role_id', 'in', roles.ids)])
         if users:
             users._apply_hdc_role()
-        self.env['ir.ui.menu'].clear_caches()
+        self.env.registry.clear_cache()
         return result
