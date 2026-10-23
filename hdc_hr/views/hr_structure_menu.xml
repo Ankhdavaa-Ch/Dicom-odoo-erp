@@ -19,7 +19,6 @@
               sequence="31"
               groups="hr.group_hr_manager"/>
 
-    <record id="menu_hdc_hr_structure" model="ir.ui.menu"><field name="active" eval="False"/></record>
-    <record id="menu_hdc_hr_structure_nodes" model="ir.ui.menu"><field name="active" eval="False"/></record>
-    <record id="menu_hdc_hr_structure_scheme" model="ir.ui.menu"><field name="active" eval="False"/></record>
+    <!-- Legacy menu IDs are not guaranteed to exist on fresh databases.
+         Do not attempt to deactivate them during initial module installation. -->
 </odoo>
