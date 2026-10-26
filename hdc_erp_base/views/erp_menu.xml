@@ -40,17 +40,6 @@
         <field name="sequence">41</field>
     </record>
 
-    <!-- Хуучин техникийн дэд цэсүүдийг хэрэглэгчийн цэснээс нуух -->
-    <record id="hdc_hr.menu_hdc_hr_structure" model="ir.ui.menu">
-        <field name="active" eval="False"/>
-    </record>
-    <record id="hdc_hr.menu_hdc_hr_structure_nodes" model="ir.ui.menu">
-        <field name="active" eval="False"/>
-    </record>
-    <record id="hdc_hr.menu_hdc_hr_structure_scheme" model="ir.ui.menu">
-        <field name="active" eval="False"/>
-    </record>
-
     <!-- ИРЦ: зөвхөн Ирцийн эрхтэй дүрүүдэд харагдана -->
     <menuitem id="menu_hdc_erp_attendance"
               name="Ирц"
