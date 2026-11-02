@@ -42,120 +42,94 @@ class HdcHrStructure(models.Model):
         self.write({'state': 'closed'})
 
     def action_generate_from_departments(self):
-        """Rebuild chart from the DICOM organization root and its descendants only."""
+        """Build the approved DICOM chart, including position-only nodes."""
         Node = self.env['hdc.hr.structure.node']
         Department = self.env['hr.department']
+        Job = self.env['hr.job']
 
+        def normalized(value):
+            return ' '.join((value or '').replace(',', ' ').lower().split())
+
+        root_name = 'Хадгаламжийн даатгалын үндэсний хороо'
         for structure in self:
-            root = Department.search([
-                ('active', '=', True),
-                ('name', '=', 'Хадгаламжийн даатгалын үндэсний хороо'),
-            ], limit=1)
+            roots = Department.search([('name', '=', root_name)])
+            if len(roots) != 1:
+                raise UserError(_('Үндэсний хорооны нэгж олдсонгүй эсвэл давхардсан байна.'))
+            root = roots[0]
+            departments = Department.search([('id', 'child_of', root.id)])
+            names = {}
+            for dep in departments:
+                key = normalized(dep.name)
+                if key in names:
+                    raise UserError(_('Давхардсан нэгж: %s') % dep.name)
+                names[key] = dep
 
-            if not root:
-                raise UserError(_('Үндсэн нэгж "Хадгаламжийн даатгалын үндэсний хороо" олдсонгүй.'))
+            # Department hierarchy stays untouched: the CEO is a position, not a department.
+            specs = [
+                ('root', root_name, 'organization', None, root_name),
+                ('secretary', 'Үндэсний хорооны нарийн бичгийн дарга', 'management', 'root', None),
+                ('audit', 'Дотоод аудитын алба', 'office', 'root', 'Дотоод аудитын алба'),
+                ('ceo', 'Гүйцэтгэх захирал', 'management', 'root', None),
+                ('economist', 'Ерөнхий эдийн засагч', 'management', 'ceo', None),
+                ('work', 'Ажлын алба', 'office', 'ceo', 'Ажлын алба'),
+                ('finance', 'Санхүү бүртгэлийн алба', 'office', 'ceo', 'Санхүү бүртгэлийн алба'),
+                ('claims_area', 'Нөхөн төлбөр, хөрөнгийн удирдлагын газар', 'department', 'ceo', 'Нөхөн төлбөр, хөрөнгийн удирдлагын газар'),
+                ('claims', 'Нөхөн төлбөр, бүтцийн өөрчлөлтийн хэлтэс', 'division', 'claims_area', 'Нөхөн төлбөр, бүтцийн өөрчлөлтийн хэлтэс'),
+                ('assets', 'Хөрөнгийн удирдлагын хэлтэс', 'division', 'claims_area', 'Хөрөнгийн удирдлагын хэлтэс'),
+                ('risk_area', 'Эрсдэлийн удирдлага, хяналт шалгалтын газар', 'department', 'ceo', 'Эрсдэлийн удирдлага, хяналт шалгалтын газар'),
+                ('inspection', 'Хяналт шалгалтын хэлтэс', 'division', 'risk_area', 'Хяналт шалгалтын хэлтэс'),
+                ('risk', 'Эрсдэлийн удирдлагын хэлтэс', 'division', 'risk_area', 'Эрсдэлийн удирдлагын хэлтэс'),
+                ('admin_area', 'Захиргаа, удирдлагын газар', 'department', 'ceo', 'Захиргаа, удирдлагын газар'),
+                ('office', 'Тамгын хэлтэс', 'division', 'admin_area', 'Тамгын хэлтэс'),
+                ('legal', 'Хуулийн хэлтэс', 'division', 'admin_area', 'Хуулийн хэлтэс'),
+                ('external', 'Гадаад харилцааны хэлтэс', 'division', 'admin_area', 'Гадаад харилцааны хэлтэс'),
+                ('it_area', 'Мэдээллийн технологийн газар', 'department', 'ceo', 'Мэдээллийн технологийн газар'),
+                ('it', 'Мэдээллийн технологийн хэлтэс', 'division', 'it_area', 'Мэдээллийн технологийн хэлтэс'),
+                ('security', 'Мэдээллийн аюулгүй байдлын ажилтан', 'management', 'it_area', None),
+            ]
+            missing = [name for _, name, _, _, dep_name in specs
+                       if dep_name and normalized(dep_name) not in names]
+            if missing:
+                raise UserError(_('Бүтцийн нэгж олдсонгүй: %s') % ', '.join(missing))
 
-            departments = Department.search([
-                ('active', '=', True),
-                ('id', 'child_of', root.id),
-            ], order='parent_path, id')
-
-            if not departments:
-                raise UserError(_('Байгууллагын бүтцэд оруулах нэгж олдсонгүй.'))
-
-            department_ids = set(departments.ids)
-
-            # The chart is an exact snapshot of the selected root tree.
-            # Remove Administration, ХДК and any other node outside that tree.
-            stale_nodes = structure.node_ids.filtered(
-                lambda n: not n.department_id or n.department_id.id not in department_ids
-            )
-            if stale_nodes:
-                stale_nodes.with_context(skip_hdc_department_sync=True).unlink()
-
-            node_by_department = {}
-            mapping = {
-                'management': 'management',
-                'department': 'department',
-                'division': 'division',
-                'office': 'office',
-                'unit': 'unit',
-            }
-
-            for department in departments:
-                node = Node.search([
-                    ('structure_id', '=', structure.id),
-                    ('department_id', '=', department.id),
-                ], limit=1)
-
-                node_type = 'organization' if department.id == root.id else mapping.get(department.hdc_unit_type, 'unit')
-                # Existing imported data may not have unit types yet. Infer the obvious
-                # organization levels from their names so the chart is readable.
-                if department.id != root.id and (not department.hdc_unit_type or node_type == 'unit'):
-                    name = (department.name or '').strip().lower()
-                    if name == 'гүйцэтгэх захирал':
-                        node_type = 'management'
-                    elif name.endswith(' газар'):
-                        node_type = 'department'
-                    elif name.endswith(' хэлтэс'):
-                        node_type = 'division'
-                    elif name.endswith(' алба'):
-                        node_type = 'office'
-
+            # Update existing nodes by department or stable code, without
+            # changing the hr.department tree or any imported employee.
+            existing = structure.node_ids
+            nodes = {}
+            for seq, (key, name, node_type, parent_key, dep_name) in enumerate(specs, 1):
+                dep = names.get(normalized(dep_name)) if dep_name else False
+                node = (existing.filtered(lambda n: n.department_id == dep)[:1]
+                        if dep else existing.filtered(lambda n: n.code == 'chart_' + key)[:1])
+                if not node and not dep:
+                    node = existing.filtered(lambda n: not n.department_id and normalized(n.name) == normalized(name))[:1]
                 values = {
-                    'name': department.name,
-                    'structure_id': structure.id,
-                    'department_id': department.id,
+                    'name': name,
+                    'code': 'chart_' + key,
+                    'sequence': seq * 10,
                     'node_type': node_type,
-                    'manager_employee_id': department.manager_id.id if department.manager_id else False,
+                    'structure_id': structure.id,
+                    'department_id': dep.id if dep else False,
+                    'manager_employee_id': dep.manager_id.id if dep and dep.manager_id else False,
                 }
-                if 'code' in department._fields:
-                    values['code'] = department.code or False
-                elif 'hdc_code' in department._fields:
-                    values['code'] = department.hdc_code or False
-
+                if not dep:
+                    matches = Job.search([('name', '=', name)])
+                    if len(matches) == 1:
+                        values['job_id'] = matches.id
                 if node:
                     node.with_context(skip_hdc_department_sync=True).write(values)
                 else:
                     node = Node.with_context(skip_hdc_department_sync=True).create(values)
-                node_by_department[department.id] = node
+                nodes[key] = node
 
-            # DICOM chart rule: these three units report directly to the Executive Director.
-            executive = departments.filtered(
-                lambda d: (d.name or '').strip().lower() == 'гүйцэтгэх захирал'
-            )[:1]
-            direct_reports = {
-                'ерөнхий эдийн засагч': 'management',
-                'ажлын алба': 'office',
-                'санхүү бүртгэлийн алба': 'office',
-            }
-
-            if executive:
-                for department in departments:
-                    normalized_name = (department.name or '').strip().lower()
-                    if normalized_name in direct_reports and department.parent_id != executive:
-                        department.with_context(skip_hdc_structure_sync=True).write({
-                            'parent_id': executive.id,
-                            'hdc_unit_type': direct_reports[normalized_name],
-                        })
-
-            for department in departments:
-                node = node_by_department[department.id]
-                normalized_name = (department.name or '').strip().lower()
-                is_direct_report = bool(executive and normalized_name in direct_reports)
-
-                if is_direct_report:
-                    parent_node = node_by_department.get(executive.id)
-                else:
-                    parent_node = (
-                        node_by_department.get(department.parent_id.id)
-                        if department.id != root.id and department.parent_id else False
-                    )
-
-                node.with_context(skip_hdc_department_sync=True).write({
-                    'parent_id': parent_node.id if parent_node else False,
-                    'node_type': direct_reports.get(normalized_name, node.node_type),
+            for key, name, node_type, parent_key, dep_name in specs:
+                nodes[key].with_context(skip_hdc_department_sync=True).write({
+                    'parent_id': nodes[parent_key].id if parent_key else False,
                 })
+
+            # Remove only nodes that are not part of the approved chart.
+            stale = structure.node_ids - Node.browse([n.id for n in nodes.values()])
+            if stale:
+                stale.with_context(skip_hdc_department_sync=True).unlink()
 
         return {
             'type': 'ir.actions.client',
