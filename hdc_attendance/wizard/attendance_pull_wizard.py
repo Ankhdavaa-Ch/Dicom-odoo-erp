@@ -281,7 +281,7 @@ class HdcAttendancePullWizard(
                         uid, user_raw, status, time_raw, punch, extra = unpack(
                             '<H24sB4sB17s', record
                         )
-                        user_id = user_raw.split(b'\\x00', 1)[0].decode(
+                        user_id = user_raw.split(bytes([0]), 1)[0].decode(
                             'utf-8', errors='replace'
                         ).strip()
                         try:
