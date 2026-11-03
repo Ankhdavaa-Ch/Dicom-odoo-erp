@@ -1,4 +1,8 @@
 from datetime import timedelta, timezone
+from struct import unpack
+from types import SimpleNamespace
+
+from zk import const as zk_const
 
 from odoo import fields, models
 from odoo.exceptions import UserError
@@ -248,10 +252,56 @@ class HdcAttendancePullWizard(
             # READ DEVICE ATTENDANCE
             # =================================================
 
-            attendance_logs = (
-                conn.get_attendance()
-                or []
+            # Horus TL1 firmware 6.60 uses 49-byte ATTLOG records.
+            # pyzk 0.9 treats any non-8/non-16 record as 40 bytes,
+            # corrupting IDs and timestamps. Decode 49-byte records
+            # explicitly; preserve pyzk for supported device formats.
+            conn.read_sizes()
+            attendance_data, buffer_size = conn.read_with_buffer(
+                zk_const.CMD_ATTLOG_RRQ
             )
+            if buffer_size < 4 or len(attendance_data) < 4:
+                attendance_logs = []
+            else:
+                total_size = unpack('<I', attendance_data[:4])[0]
+                payload = attendance_data[4:]
+                records = conn.records
+                if not records:
+                    attendance_logs = []
+                elif total_size != len(payload) or total_size % records:
+                    raise UserError(
+                        'Төхөөрөмжийн логийн хэмжээ зөрүүтэй байна: '
+                        'records=%s, header=%s, payload=%s'
+                        % (records, total_size, len(payload))
+                    )
+                elif total_size // records == 49:
+                    attendance_logs = []
+                    for offset in range(0, total_size, 49):
+                        record = payload[offset:offset + 49]
+                        uid, user_raw, status, time_raw, punch, extra = unpack(
+                            '<H24sB4sB17s', record
+                        )
+                        user_id = user_raw.split(b'\\x00', 1)[0].decode(
+                            'utf-8', errors='replace'
+                        ).strip()
+                        try:
+                            timestamp = conn._ZK__decode_time(time_raw)
+                        except (ValueError, OverflowError):
+                            timestamp = None
+                        attendance_logs.append(SimpleNamespace(
+                            uid=uid, user_id=user_id, timestamp=timestamp,
+                            status=status, punch=punch,
+                        ))
+                else:
+                    # The standard pyzk parser supports 8, 16, 40 bytes.
+                    # Reject unknown sizes instead of silently misparsing.
+                    record_size = total_size // records
+                    if record_size not in (8, 16, 40):
+                        raise UserError(
+                            'Дэмжигдээгүй attendance record хэмжээ: %s байт'
+                            % record_size
+                        )
+                    attendance_logs = conn.get_attendance() or []
 
             # =================================================
             # COUNTERS
