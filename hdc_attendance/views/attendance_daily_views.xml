@@ -10,6 +10,7 @@
                 </header>
                 <field name="attendance_date"/>
                 <field name="employee_id"/>
+                <field name="device_user_id"/>
                 <field name="department_name" string="Газар / хэлтэс"/>
                 <field name="job_id"/>
                 <field name="planned_check_in"/>
@@ -37,6 +38,7 @@
                     <group>
                         <group string="Ажилтны мэдээлэл">
                             <field name="employee_id"/>
+                <field name="device_user_id"/>
                             <field name="attendance_date"/>
                             <field name="department_name" string="Газар / хэлтэс"/>
                             <field name="job_id"/>
