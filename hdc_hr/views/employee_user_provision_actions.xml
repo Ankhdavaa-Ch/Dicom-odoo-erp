@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="action_create_active_employee_users" model="ir.actions.server">
+    <field name="name">Идэвхтэй ажилтнуудад системийн хэрэглэгч үүсгэх</field>
+    <field name="model_id" ref="hr.model_hr_employee"/>
+    <field name="binding_model_id" ref="hr.model_hr_employee"/>
+    <field name="binding_view_types">list</field>
+    <field name="state">code</field>
+    <field name="code">action = model.action_create_internal_users_from_active_employees()</field>
+    <field name="groups_id" eval="[(4, ref('base.group_system'))]"/>
+  </record>
+</odoo>
