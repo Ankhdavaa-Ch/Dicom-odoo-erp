@@ -44,6 +44,8 @@ class HdcAttendanceDaily(models.Model):
         ('absent', 'Тасалсан'),
     ], string='Төлөв', compute='_compute_attendance_values', store=True)
 
+    device_user_id = fields.Char(string='Төхөөрөмжийн код', related='employee_id.attendance_device_user_id', readonly=True)
+
     raw_log_ids = fields.Many2many('hdc.attendance.raw.log', string='Raw Logs', readonly=True)
 
     _sql_constraints = [
