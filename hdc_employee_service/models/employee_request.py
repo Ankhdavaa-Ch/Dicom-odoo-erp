@@ -145,9 +145,15 @@ class HdcEmployeeRequest(models.Model):
 
     def _applicable_workflow_steps(self):
         self.ensure_one()
-        return self.workflow_id.step_ids.filtered(
+        steps = self.workflow_id.step_ids.filtered(
             lambda step: step.applies_to_request(self)
         ).sorted(lambda step: (step.sequence, step.id))
+        # Hourly leave (under eight hours) is approved only by the employee's
+        # own department director, even if the generic leave workflow has
+        # additional division-level steps.
+        if self.request_type == 'leave' and self.duration_minutes < 8 * 60:
+            return steps.filtered(lambda step: step.approver_type == 'department')[:1]
+        return steps
 
     def _next_workflow_step(self, step):
         self.ensure_one()
@@ -167,7 +173,9 @@ class HdcEmployeeRequest(models.Model):
         """Resolve a unit manager from either the explicit approver or Odoo's department manager."""
         if not department:
             return self.env['res.users']
-        return department.hdc_approver_user_id or department.manager_id.user_id
+        # Prefer the standard department director (Manager). Fall back to the
+        # explicitly configured approver if the manager has no Odoo login.
+        return department.manager_id.user_id or department.hdc_approver_user_id
 
     def _approver_for_level(self, level):
         self.ensure_one()
