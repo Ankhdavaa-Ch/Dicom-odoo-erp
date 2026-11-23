@@ -235,7 +235,26 @@ class HdcEmployeeRequest(models.Model):
             if not approver:
                 raise UserError(_('Таны хэлтсийн батлагч тохируулагдаагүй байна.'))
             if approver == self.env.user:
-                raise UserError(_('Өөрийн хүсэлтийг өөрөө батлах боломжгүй. Дээд шатны батлагч тохируулна уу.'))
+                # A division director is also the Manager of their own unit.
+                # Their leave must go straight to the CEO, never to themselves.
+                unit = rec.department_id
+                is_division_director = (
+                    rec.request_type == 'leave'
+                    and unit
+                    and (unit.hdc_unit_type == 'department'
+                         or (unit.name or '').strip().lower().endswith(' газар'))
+                    and unit.manager_id == rec.employee_id
+                )
+                if not is_division_director:
+                    raise UserError(_('Өөрийн хүсэлтийг өөрөө батлах боломжгүй. Дээд шатны батлагч тохируулна уу.'))
+                approver = rec._approver_for_level('executive')
+                if not approver or approver == self.env.user:
+                    raise UserError(_('Гүйцэтгэх захирлын системийн хэрэглэгчийг тохируулна уу.'))
+                # Direct CEO approval is the final step for a division
+                # director's leave. Do not retain a lower workflow step.
+                first_step = False
+                first_level = 'executive'
+                final_level = 'executive'
 
             # Close the employee's previous decision notification before resubmitting.
             employee_user = rec._employee_user()
