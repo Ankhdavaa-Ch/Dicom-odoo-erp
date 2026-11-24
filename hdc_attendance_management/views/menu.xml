@@ -8,10 +8,12 @@
 <menuitem id="menu_employees" name="Ажилтан" parent="menu_reference" action="action_employees" sequence="10"/>
 <menuitem id="menu_plan" name="Төлөвлөгөө" parent="menu_root" action="action_dashboard" sequence="30"/>
 <menuitem id="menu_register" name="Бүртгэл" parent="menu_root" sequence="40"/>
-<menuitem id="menu_daily" name="Өдрийн ирц" parent="menu_register" action="hdc_attendance.action_hdc_attendance_daily" sequence="10"/>
-<menuitem id="menu_raw" name="Ирцийн бүртгэл" parent="menu_register" action="hdc_attendance.action_hdc_attendance_raw_log" sequence="20"/>
 <menuitem id="menu_balance" name="Цагийн баланс" parent="menu_root" action="action_dashboard" sequence="50"/>
-<menuitem id="menu_settings" name="Тохиргоо" parent="menu_root" action="hdc_attendance.action_hdc_attendance_device" sequence="60"/>
-<menuitem id="menu_report" name="Тайлан" parent="menu_root" action="hdc_attendance.action_hdc_attendance_daily" sequence="70"/>
+<menuitem id="menu_settings" name="Тохиргоо" parent="menu_root" sequence="60"/>
+<menuitem id="menu_report" name="Тайлан" parent="menu_root" sequence="70"/>
 <menuitem id="menu_about" name="Системийн тухай" parent="menu_root" action="action_about" sequence="80"/>
+<!-- Remove obsolete menu aliases on existing installations as well. -->
+<delete model="ir.ui.menu" search="[('parent_id', '=', ref('hdc_attendance_management.menu_register')), ('name', 'in', ['Өдрийн ирц', 'Ирцийн бүртгэл'])]"/>
+<record id="menu_settings" model="ir.ui.menu"><field name="action" eval="False"/></record>
+<record id="menu_report" model="ir.ui.menu"><field name="action" eval="False"/></record>
 </odoo>
