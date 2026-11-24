@@ -1,0 +1,8 @@
+<odoo noupdate="1">
+<record id="schedule_001" model="hdc.attendance.schedule.type"><field name="code">001</field><field name="name">Энгийн хуваарь</field></record>
+<record id="schedule_002" model="hdc.attendance.schedule.type"><field name="code">002</field><field name="name">Уян хатан цагийн хуваарь</field></record>
+<record id="schedule_003" model="hdc.attendance.schedule.type"><field name="code">003</field><field name="name">Зуны хуваарь</field></record>
+<record id="schedule_004" model="hdc.attendance.schedule.type"><field name="code">004</field><field name="name">Өвлийн хуваарь</field></record>
+<record id="schedule_005" model="hdc.attendance.schedule.type"><field name="code">005</field><field name="name">Хөхүүл ээжийн цагийн хуваарь</field></record>
+<record id="schedule_006" model="hdc.attendance.schedule.type"><field name="code">006</field><field name="name">Хөхүүл ээжийн цаг2</field></record>
+</odoo>

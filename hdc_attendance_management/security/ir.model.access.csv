@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_schedule_type_0,schedule_type_0,model_hdc_attendance_schedule_type,hdc_attendance.group_hdc_attendance_manager,1,1,1,1
+access_schedule_type_1,schedule_type_1,model_hdc_attendance_schedule_type,base.group_system,1,1,1,1
+access_holiday_0,holiday_0,model_hdc_attendance_holiday,hdc_attendance.group_hdc_attendance_manager,1,1,1,1
+access_holiday_1,holiday_1,model_hdc_attendance_holiday,base.group_system,1,1,1,1

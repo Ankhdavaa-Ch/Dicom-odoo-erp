@@ -5,7 +5,9 @@
 <menuitem id="menu_root" name="Цаг бүртгэлийн удирдлага" parent="hdc_erp_base.menu_hdc_erp_root" action="action_dashboard" sequence="100" groups="hdc_attendance.group_hdc_attendance_manager,base.group_system"/>
 <menuitem id="menu_dashboard" name="Хяналтын самбар" parent="menu_root" action="action_dashboard" sequence="10"/>
 <menuitem id="menu_reference" name="Лавлах" parent="menu_root" sequence="20"/>
-<menuitem id="menu_employees" name="Ажилтан" parent="menu_reference" action="action_employees" sequence="10"/>
+<menuitem id="menu_schedule_type" name="Хуваарийн төрөл" parent="menu_reference" action="action_schedule_type" sequence="10"/>
+<menuitem id="menu_holiday" name="Баярын өдрүүд" parent="menu_reference" action="action_holiday" sequence="20"/>
+<delete model="ir.ui.menu" search="[('parent_id', '=', ref('hdc_attendance_management.menu_reference')), ('name', '=', 'Ажилтан')]"/>
 <menuitem id="menu_plan" name="Төлөвлөгөө" parent="menu_root" action="action_dashboard" sequence="30"/>
 <menuitem id="menu_register" name="Бүртгэл" parent="menu_root" sequence="40"/>
 <menuitem id="menu_balance" name="Цагийн баланс" parent="menu_root" action="action_dashboard" sequence="50"/>
