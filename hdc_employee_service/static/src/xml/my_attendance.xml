@@ -34,8 +34,9 @@
                                         <div class="hdc_planned">◷ <t t-esc="day.planned"/></div>
                                         <div class="hdc_day_details">
                                             <div t-if="day.status !== 'empty'" t-att-class="day.status === 'late' || day.status === 'late_early' ? 'text-danger' : 'text-primary'">
-                                                <t t-esc="statusLabel(day.status)"/>
+                                                <t t-if="day.status === 'holiday'">Баярын амралт</t><t t-else="" t-esc="statusLabel(day.status)"/>
                                             </div>
+                                            <div t-if="day.holiday_name" class="text-success" t-esc="day.holiday_name"/>
                                             <div t-if="day.late !== '00:00'" class="text-danger">Хоцорсон <span t-esc="day.late"/></div>
                                             <div t-if="day.early !== '00:00'" class="text-primary">Эрт явсан <span t-esc="day.early"/></div>
                                             <t t-foreach="day.requests || []" t-as="request" t-key="request.id + '-' + day.date">

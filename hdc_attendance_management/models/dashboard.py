@@ -18,6 +18,9 @@ class AttendanceDashboard(models.Model):
         employees = self.env['hr.employee'].sudo().search([('company_id', 'in', self.env.companies.ids), ('active', '=', True)])
         daily = self.sudo().search([('employee_id', 'in', employees.ids), ('attendance_date', '>=', start), ('attendance_date', '<', end), ('attendance_date', '<=', today)])
         recent = self.sudo().search([('employee_id', 'in', employees.ids), ('attendance_date', 'in', [today, yesterday])])
+        holidays = self.env['hdc.attendance.holiday']._holiday_days(min(start, yesterday), max(end, today))
+        daily = daily.filtered(lambda r: r.attendance_date not in holidays)
+        recent = recent.filtered(lambda r: r.attendance_date not in holidays)
         requests = self.env['hdc.employee.request'].sudo().search([
             ('employee_id', 'in', employees.ids), ('state', '=', 'approved'),
             ('date_from', '<', datetime.combine(end, datetime.min.time()) - timedelta(hours=8)),
@@ -26,7 +29,7 @@ class AttendanceDashboard(models.Model):
         rows = defaultdict(lambda: {'worked': 0, 'late': 0, 'early': 0, 'overtime': 0, 'planned': 0, 'outside': 0, 'sick': 0, 'leave': 0, 'annual': 0, 'absent': 0})
         # Provisional weekday baseline, matching the existing 480-minute rule.
         # Excludes future dates; holidays and individual calendars are not yet applied.
-        days = sum((start + timedelta(days=i)).weekday() < 5
+        days = sum((start + timedelta(days=i)).weekday() < 5 and (start + timedelta(days=i)) not in holidays
                    for i in range(max(0, (min(end, today + timedelta(days=1)) - start).days)))
         for employee in employees:
             rows[employee.department_id.name or 'Нэгжгүй']['planned'] += days * 8
@@ -48,7 +51,7 @@ class AttendanceDashboard(models.Model):
             day = max(start, a.date())
             last = min(end - timedelta(days=1), today, b.date())
             while day <= last:
-                if day.weekday() < 5:
+                if day.weekday() < 5 and day not in holidays:
                     midnight = datetime.combine(day, datetime.min.time())
                     for lo, hi in [(8, 12), (13, 17)]:
                         left = max(a, midnight + timedelta(hours=lo))
@@ -85,7 +88,7 @@ class AttendanceDashboard(models.Model):
             ('Энэ сард ээлжийн амралттай байгаа ажилтан', requests.filtered(lambda r: r.request_type == 'annual_leave').mapped('employee_id')),
             ('Энэ сард ХАЧ болон Ж/Амралттай ажилтан', requests.filtered(lambda r: r.request_type in ('sick', 'maternity_leave')).mapped('employee_id')),
             ('Цагаа бүртгүүлдэггүй ажилтнууд', employees.filtered(lambda e: not e.attendance_device_user_id)),
-            ('Цагаа бүртгүүлээгүй ажилтан /өнөөдрөөр/', employees - recent.filtered(lambda r: r.attendance_date == today and r.actual_check_in).mapped('employee_id')),
+            ('Цагаа бүртгүүлээгүй ажилтан /өнөөдрөөр/', employees.browse([]) if today in holidays else employees - recent.filtered(lambda r: r.attendance_date == today and r.actual_check_in).mapped('employee_id')),
             ('Орсон, гарсан цаг дутуу ажилтан /өчигдрөөр/', recent.filtered(lambda r: r.attendance_date == yesterday and r.status == 'incomplete').mapped('employee_id')),
             ('Хоцролттой ажилтан /өчигдрөөр/', recent.filtered(lambda r: r.attendance_date == yesterday and r.late_minutes > 0).mapped('employee_id')),
             ('60 минутаас дээш хоцролттой байгаа ажилтан /сараар/', employees.filtered(lambda e: late_totals.get(e.id, 0) > 60)),

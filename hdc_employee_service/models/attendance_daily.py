@@ -37,6 +37,7 @@ class HdcAttendanceDaily(models.Model):
 
         start = date.fromisoformat(date_from)
         end = date.fromisoformat(date_to)
+        holidays = self.env['hdc.attendance.holiday']._holiday_days(start, end) if 'hdc.attendance.holiday' in self.env else {}
         records = self.sudo().search([
             ('employee_id', '=', employee.id),
             ('attendance_date', '>=', start),
@@ -100,7 +101,7 @@ class HdcAttendanceDaily(models.Model):
                 overlap_start = max(local_from, day_start)
                 overlap_end = min(local_to, day_end)
                 minutes = max(int((overlap_end - overlap_start).total_seconds() / 60), 0)
-                if minutes:
+                if minutes and current_day not in holidays:
                     item = {
                         'id': request.id,
                         'type': request.request_type,
@@ -129,6 +130,17 @@ class HdcAttendanceDaily(models.Model):
         while cursor <= end:
             record = by_date.get(cursor)
             weekday = cursor.weekday()
+            if cursor in holidays:
+                days.append({
+                    'date': cursor.isoformat(), 'day': cursor.day, 'weekday': weekday,
+                    'is_weekend': weekday >= 5, 'planned': '-', 'check_in': '', 'check_out': '',
+                    'worked': '00:00', 'late': '00:00', 'early': '00:00',
+                    'raw_late': '00:00', 'raw_early': '00:00', 'excused_late': '00:00',
+                    'excused_early': '00:00', 'overtime': '00:00', 'status': 'holiday',
+                    'holiday_name': holidays[cursor], 'requests': [],
+                })
+                cursor += timedelta(days=1)
+                continue
             planned = 480 if weekday < 5 else 0
             totals['planned_minutes'] += planned
             day_requests = requests_by_date.get(cursor, [])
