@@ -7,12 +7,15 @@ class Dashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.state = useState({month: "", cards: [], rows: [], section: "dashboard"});
+        this.state = useState({month: "", cards: [], rows: [], section: "dashboard", selectedCard: null});
         onWillStart(() => this.load());
     }
     async load(month = null) {
         Object.assign(this.state, await this.orm.call("hdc.attendance.daily", "management_dashboard", [month]));
     }
+    showCard(index) { this.state.selectedCard = index; }
+    closeCard() { this.state.selectedCard = null; }
+    get selectedCard() { return this.state.selectedCard === null ? null : this.state.cards[this.state.selectedCard]; }
     changeMonth(ev) { if (ev.target.value) return this.load(ev.target.value); }
     get reasonMax() { return Math.max(1, ...this.state.rows.map(r => this.reasons.reduce((sum, reason) => sum + (r[reason.key] || 0), 0))); }
     get workMax() { return Math.max(1, ...this.state.rows.map(r => Math.max(r.worked,r.planned))); }

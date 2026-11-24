@@ -79,16 +79,35 @@ class AttendanceDashboard(models.Model):
         for r in daily:
             if r.status == 'absent' and r.attendance_date < today and r.attendance_date.weekday() < 5:
                 rows[r.department_id.name or 'Нэгжгүй']['absent'] += max(0, 8-hours(excused[(r.employee_id.id, r.attendance_date)]))
-        return {'month': start.strftime('%Y-%m'), 'cards': [
-            ['Шинэ ажилтан сүүлийн 1 сараар', len(employees.filtered(lambda e: e.create_date and today - relativedelta(months=1) <= (e.create_date + timedelta(hours=8)).date() <= today))],
-            ['Энэ сард ээлжийн амралттай байгаа ажилтан', len(requests.filtered(lambda r: r.request_type == 'annual_leave').mapped('employee_id'))],
-            ['Энэ сард ХАЧ болон Ж/Амралттай ажилтан', len(requests.filtered(lambda r: r.request_type == 'sick').mapped('employee_id'))],
-            ['Цагаа бүртгүүлдэггүй ажилтнууд', len(employees.filtered(lambda e: not e.attendance_device_user_id))],
-            ['Цагаа бүртгүүлээгүй ажилтан /өнөөдрөөр/', len(employees - recent.filtered(lambda r: r.attendance_date == today and r.actual_check_in).mapped('employee_id'))],
-            ['Орсон, гарсан цаг дутуу ажилтан /өчигдрөөр/', len(recent.filtered(lambda r: r.attendance_date == yesterday and r.status == 'incomplete'))],
-            ['Хоцролттой ажилтан /өчигдрөөр/', len(recent.filtered(lambda r: r.attendance_date == yesterday and r.late_minutes > 0))],
-            ['60 минутаас дээш хоцролттой байгаа ажилтан /сараар/', len([v for v in self._management_late_totals(daily).values() if v > 60])],
-        ], 'rows': [{'name': k, **{f: round(v, 2) for f,v in row.items()}} for k,row in sorted(rows.items())]}
+        late_totals = self._management_late_totals(daily)
+        categories = [
+            ('Шинэ ажилтан сүүлийн 1 сараар', employees.filtered(lambda e: e.create_date and today - relativedelta(months=1) <= (e.create_date + offset).date() <= today)),
+            ('Энэ сард ээлжийн амралттай байгаа ажилтан', requests.filtered(lambda r: r.request_type == 'annual_leave').mapped('employee_id')),
+            ('Энэ сард ХАЧ болон Ж/Амралттай ажилтан', requests.filtered(lambda r: r.request_type in ('sick', 'maternity_leave')).mapped('employee_id')),
+            ('Цагаа бүртгүүлдэггүй ажилтнууд', employees.filtered(lambda e: not e.attendance_device_user_id)),
+            ('Цагаа бүртгүүлээгүй ажилтан /өнөөдрөөр/', employees - recent.filtered(lambda r: r.attendance_date == today and r.actual_check_in).mapped('employee_id')),
+            ('Орсон, гарсан цаг дутуу ажилтан /өчигдрөөр/', recent.filtered(lambda r: r.attendance_date == yesterday and r.status == 'incomplete').mapped('employee_id')),
+            ('Хоцролттой ажилтан /өчигдрөөр/', recent.filtered(lambda r: r.attendance_date == yesterday and r.late_minutes > 0).mapped('employee_id')),
+            ('60 минутаас дээш хоцролттой байгаа ажилтан /сараар/', employees.filtered(lambda e: late_totals.get(e.id, 0) > 60)),
+        ]
+        cards = []
+        for index, (label, members) in enumerate(categories):
+            details = []
+            for employee in members.sorted(lambda e: (e.name or '', e.id)):
+                detail = ''
+                if index == 0:
+                    detail = (employee.create_date + offset).date().isoformat()
+                elif index in (1, 2):
+                    types = ('annual_leave',) if index == 1 else ('sick', 'maternity_leave')
+                    detail = ', '.join('%s – %s' % ((r.date_from + offset).date(), (r.date_to + offset).date()) for r in requests if r.employee_id == employee and r.request_type in types)
+                elif index == 6:
+                    detail = '%s мин' % sum(r.late_minutes for r in recent if r.employee_id == employee and r.attendance_date == yesterday)
+                elif index == 7:
+                    detail = '%s мин' % late_totals.get(employee.id, 0)
+                details.append({'id': employee.id, 'name': employee.name or '', 'department': employee.department_id.name or '', 'job': employee.job_id.name or '', 'detail': detail})
+            cards.append([label, len(details), details])
+        return {'month': start.strftime('%Y-%m'), 'cards': cards,
+                'rows': [{'name': k, **{f: round(v, 2) for f,v in row.items()}} for k,row in sorted(rows.items())]}
 
     def _management_late_totals(self, records):
         totals = defaultdict(int)
