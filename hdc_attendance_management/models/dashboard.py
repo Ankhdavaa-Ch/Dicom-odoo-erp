@@ -22,7 +22,7 @@ class AttendanceDashboard(models.Model):
             ('date_from', '<', datetime.combine(end, datetime.min.time()) - timedelta(hours=8)),
             ('date_to', '>', datetime.combine(start, datetime.min.time()) - timedelta(hours=8)),
         ])
-        rows = defaultdict(lambda: {'worked': 0, 'late': 0, 'early': 0, 'overtime': 0, 'planned': 0})
+        rows = defaultdict(lambda: {'worked': 0, 'late': 0, 'early': 0, 'overtime': 0, 'planned': 0, 'outside': 0, 'sick': 0, 'leave': 0, 'annual': 0, 'absent': 0})
         # Provisional weekday baseline, matching the existing 480-minute rule.
         # Excludes future dates; holidays and individual calendars are not yet applied.
         days = sum((start + timedelta(days=i)).weekday() < 5
@@ -33,6 +33,51 @@ class AttendanceDashboard(models.Model):
             row = rows[r.department_id.name or 'Нэгжгүй']
             for key, field in [('worked','worked_minutes'), ('late','late_minutes'), ('early','early_leave_minutes'), ('overtime','overtime_minutes')]:
                 row[key] += getattr(r, field) / 60
+        # Split approved requests by local working day, excluding lunch and
+        # weekends. Merge overlapping intervals of the same type.
+        kinds = {'outside_work': 'outside', 'sick': 'sick',
+                 'leave': 'leave', 'annual_leave': 'annual'}
+        intervals = defaultdict(list)
+        offset = timedelta(hours=8)
+        for req in requests:
+            kind = kinds.get(req.request_type)
+            if not kind:
+                continue
+            a, b = req.date_from + offset, req.date_to + offset
+            day = max(start, a.date())
+            last = min(end - timedelta(days=1), today, b.date())
+            while day <= last:
+                if day.weekday() < 5:
+                    midnight = datetime.combine(day, datetime.min.time())
+                    for lo, hi in [(8, 12), (13, 17)]:
+                        left = max(a, midnight + timedelta(hours=lo))
+                        right = min(b, midnight + timedelta(hours=hi))
+                        if right > left:
+                            intervals[(req.employee_id.id, day, kind)].append((left, right))
+                day += timedelta(days=1)
+
+        def hours(spans):
+            merged = []
+            for a, b in sorted(spans):
+                if merged and a <= merged[-1][1]:
+                    merged[-1][1] = max(b, merged[-1][1])
+                else:
+                    merged.append([a, b])
+            return sum((b-a).total_seconds()/3600 for a,b in merged)
+
+        by_employee = {e.id: e for e in employees}
+        daily_by_key = {(r.employee_id.id, r.attendance_date): r for r in daily}
+        excused = defaultdict(list)
+        for (eid, day, kind), spans in intervals.items():
+            record = daily_by_key.get((eid, day))
+            department = record.department_id if record else by_employee[eid].department_id
+            rows[department.name or 'Нэгжгүй'][kind] += hours(spans)
+            excused[(eid, day)].extend(spans)
+        # Only explicit processed absent records are counted, not missing
+        # device data. Do not count today's unfinished attendance as absence.
+        for r in daily:
+            if r.status == 'absent' and r.attendance_date < today and r.attendance_date.weekday() < 5:
+                rows[r.department_id.name or 'Нэгжгүй']['absent'] += max(0, 8-hours(excused[(r.employee_id.id, r.attendance_date)]))
         return {'month': start.strftime('%Y-%m'), 'cards': [
             ['Идэвхтэй ажилтан', len(employees)],
             ['Ээлжийн амралттай /сонгосон сар/', len(requests.filtered(lambda r: r.request_type == 'annual_leave').mapped('employee_id'))],
