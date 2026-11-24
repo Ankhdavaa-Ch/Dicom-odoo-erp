@@ -2,7 +2,7 @@
 <record id="action_dashboard" model="ir.actions.client"><field name="name">Хяналтын самбар</field><field name="tag">hdc_attendance_management.dashboard</field></record>
 <record id="action_about" model="ir.actions.client"><field name="name">Системийн тухай</field><field name="tag">hdc_attendance_management.dashboard</field></record>
 <record id="action_employees" model="ir.actions.act_window"><field name="name">Ажилтан</field><field name="res_model">hr.employee</field><field name="view_mode">list,form</field></record>
-<menuitem id="menu_root" name="Цаг бүртгэлийн удирдлага" action="action_dashboard" sequence="25" groups="hdc_attendance.group_hdc_attendance_manager,base.group_system"/>
+<menuitem id="menu_root" name="Цаг бүртгэлийн удирдлага" parent="hdc_erp_base.menu_hdc_erp_root" action="action_dashboard" sequence="100" groups="hdc_attendance.group_hdc_attendance_manager,base.group_system"/>
 <menuitem id="menu_dashboard" name="Хяналтын самбар" parent="menu_root" action="action_dashboard" sequence="10"/>
 <menuitem id="menu_reference" name="Лавлах" parent="menu_root" sequence="20"/>
 <menuitem id="menu_employees" name="Ажилтан" parent="menu_reference" action="action_employees" sequence="10"/>
