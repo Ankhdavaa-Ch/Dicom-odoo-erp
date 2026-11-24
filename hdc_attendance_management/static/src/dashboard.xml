@@ -1,16 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<templates xml:space="preserve">
-<t t-name="hdc_attendance_management.Dashboard">
-<div class="o_action overflow-auto p-3 bg-light">
-<div class="d-flex justify-content-between align-items-center mb-3"><h3>Цаг бүртгэлийн удирдлага</h3><div><input type="month" t-att-value="state.month" t-on-change="changeMonth"/><button class="btn btn-secondary ms-2" t-on-click="() => this.load(state.month)">Шинэчлэх</button></div></div>
+<templates xml:space="preserve"><t t-name="hdc_attendance_management.Dashboard">
+<div class="o_action overflow-auto bg-light">
+<div class="bg-white border-bottom px-3 py-2 d-flex flex-wrap gap-2">
+<t t-foreach="tabs" t-as="tab" t-key="tab.key"><button t-att-class="'btn btn-sm '+(state.section === tab.key ? 'btn-primary' : 'btn-light')" t-on-click="() => this.selectTab(tab.key)" t-esc="tab.label"/></t>
+</div>
+<div class="p-3">
+<t t-if="state.section === 'dashboard'">
+<div class="d-flex justify-content-between align-items-center mb-3"><h4>Цаг бүртгэлийн удирдлага</h4><div><input type="month" t-att-value="state.month" t-on-change="changeMonth"/><button class="btn btn-secondary ms-2" t-on-click="() => this.load(state.month)">Шинэчлэх</button></div></div>
 <div class="row g-2 mb-3">
 <t t-foreach="state.cards" t-as="card" t-key="card_index"><div class="col-12 col-md-6 col-xl-3"><div class="p-3 rounded text-white d-flex justify-content-between align-items-center" t-att-style="'background:'+['#129fbc','#4bb2a7','#62aa78','#d87589','#d66a80','#9285dc','#ad842c','#d78949'][card_index]"><span t-esc="card[0]"/><strong class="fs-4" t-esc="card[1]"/></div></div></t>
 </div>
+
 <div class="row g-3">
-<div class="col-xl-6"><div class="card p-3"><h5>Цагийн шалтгаанаар /сараар/</h5><small>Хоцролт · Дутуу ажилласан · Илүү цаг (цаг)</small>
-<t t-foreach="state.rows" t-as="r" t-key="r.name"><div class="mt-2"><small t-esc="r.name"/><div class="d-flex" style="height:20px"><t t-foreach="['late','early','overtime']" t-as="k" t-key="k"><div t-att-title="k+': '+r[k]" t-att-style="'width:'+(100*r[k]/maxHours)+'%;background:'+({late:'#51bac6',early:'#ef9574',overtime:'#a56abe'}[k])"/></t></div><small t-esc="r.late+' / '+r.early+' / '+r.overtime"/></div></t>
-</div></div>
-<div class="col-xl-6"><div class="card p-3"><h5>Ажилласан цаг /салбар нэгжээр/</h5><t t-foreach="state.rows" t-as="r" t-key="r.name"><div class="mt-2"><small t-esc="r.name"/><div class="d-flex align-items-center gap-2"><div t-att-style="'height:20px;background:#51bac6;width:'+(100*r.worked/maxHours)+'%'"/><small t-esc="r.worked"/></div></div></t></div></div>
-</div><p class="text-muted mt-3">Эхний хувилбар: төхөөрөмжийн боловсруулсан ирц. Төлөвлөсөн цаг, зөвшөөрөгдсөн чөлөөгөөр засварласан баланс дараагийн шатанд нэмэгдэнэ.</p>
-</div>
-</t></templates>
+<div class="col-xl-6"><div class="card p-3"><h5>Цагийн шалтгаанаар /сараар/</h5>
+<div class="mt-3" t-foreach="state.rows" t-as="r" t-key="r.name" style="display:grid;grid-template-columns:42% 58%;align-items:center;min-height:24px">
+<small class="text-end pe-2" t-esc="r.name"/><div class="d-flex border-start" style="height:20px;background:repeating-linear-gradient(to right,transparent 0%,transparent 24.8%,#e5e5e5 25%)">
+<t t-foreach="reasons" t-as="reason" t-key="reason.key"><div class="text-center overflow-hidden" t-att-title="reason.label+': '+r[reason.key]" t-att-style="'width:'+(100*r[reason.key]/reasonMax)+'%;background:'+reason.color"><small t-if="r[reason.key]/reasonMax > 0.12" t-esc="r[reason.key]"/></div></t></div></div>
+<div class="d-flex flex-wrap gap-3 mt-4"><t t-foreach="reasons" t-as="reason" t-key="reason.key"><small><span class="d-inline-block me-1" t-att-style="'width:12px;height:12px;background:'+reason.color"/><t t-esc="reason.label"/></small></t></div></div></div>
+<div class="col-xl-6"><div class="card p-3"><h5>Төлөвлөсөн цаг vs Ажилласан цаг /салбар нэгжээр/</h5>
+<div class="mt-2" t-foreach="state.rows" t-as="r" t-key="r.name" style="display:grid;grid-template-columns:42% 58%;align-items:center;min-height:32px"><small class="text-end pe-2" t-esc="r.name"/><div class="border-start" style="background:repeating-linear-gradient(to right,transparent 0%,transparent 24.8%,#e5e5e5 25%)"><t t-foreach="['planned','worked']" t-as="k" t-key="k"><div class="d-flex align-items-center" style="height:14px"><div t-att-title="k+': '+r[k]" t-att-style="'height:13px;width:'+(100*r[k]/workMax)+'%;background:'+(k==='planned'?'#51bac6':'#f46f60')"/><small class="ms-1" t-esc="r[k]"/></div></t></div></div>
+<div class="d-flex gap-3 mt-4"><small><span style="display:inline-block;width:12px;height:12px;background:#51bac6"/> Төлөвлөсөн цаг</small><small><span style="display:inline-block;width:12px;height:12px;background:#f46f60"/> Ажилласан цаг</small></div></div></div>
+</div><p class="text-muted mt-3">Төлөвлөсөн цаг: өнөөдрийг хүртэлх Даваа–Баасан гарагт 8 цаг. Баярын өдөр, хувийн хуваарь, батлагдсан чөлөөний засвар хараахан тусгагдаагүй.</p>
+</t>
+<t t-elif="state.section === 'reference'"><button class="btn btn-outline-primary" t-on-click="() => this.openAction('hdc_attendance_management.action_employees')">Ажилтан</button></t>
+<t t-elif="state.section === 'register'"><button class="btn btn-outline-primary me-2" t-on-click="() => this.openAction('hdc_attendance.action_hdc_attendance_daily')">Өдрийн ирц</button><button class="btn btn-outline-primary" t-on-click="() => this.openAction('hdc_attendance.action_hdc_attendance_raw_log')">Ирцийн бүртгэл</button></t>
+<t t-elif="state.section === 'settings'"><button class="btn btn-outline-primary" t-on-click="() => this.openAction('hdc_attendance.action_hdc_attendance_device')">Төхөөрөмжүүд</button></t>
+<t t-elif="state.section === 'report'"><button class="btn btn-outline-primary" t-on-click="() => this.openAction('hdc_attendance.action_hdc_attendance_daily')">Өдрийн ирцийн тайлан</button></t>
+<t t-elif="state.section === 'about'"><h4>Цаг бүртгэлийн удирдлага</h4><p>ХДК ERP · Odoo 18 · 18.0.1.1.0</p></t>
+<t t-else=""><div class="alert alert-info">Энэ хэсгийн бүрэн ажиллагааг дараагийн хөгжүүлэлтээр нэмнэ.</div></t>
+</div></div></t></templates>

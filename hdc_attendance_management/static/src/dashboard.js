@@ -6,13 +6,19 @@ class Dashboard extends Component {
     static template = "hdc_attendance_management.Dashboard";
     setup() {
         this.orm = useService("orm");
-        this.state = useState({month: "", cards: [], rows: []});
+        this.action = useService("action");
+        this.state = useState({month: "", cards: [], rows: [], section: "dashboard"});
         onWillStart(() => this.load());
     }
     async load(month = null) {
         Object.assign(this.state, await this.orm.call("hdc.attendance.daily", "management_dashboard", [month]));
     }
     changeMonth(ev) { if (ev.target.value) return this.load(ev.target.value); }
-    get maxHours() { return Math.max(1, ...this.state.rows.map(r => r.worked), ...this.state.rows.map(r => r.late+r.early+r.overtime)); }
+    get reasonMax() { return Math.max(1, ...this.state.rows.map(r => r.late+r.early+r.overtime)); }
+    get workMax() { return Math.max(1, ...this.state.rows.map(r => Math.max(r.worked,r.planned))); }
+    get reasons() { return [{key:"late",label:"Хоцорсон цаг",color:"#51bac6"},{key:"early",label:"Дутуу ажилласан цаг",color:"#ef9574"},{key:"overtime",label:"Илүү цаг",color:"#a56abe"}]; }
+    get tabs() { return [{key:"dashboard",label:"Хяналтын самбар"},{key:"reference",label:"Лавлах"},{key:"plan",label:"Төлөвлөгөө"},{key:"register",label:"Бүртгэл"},{key:"balance",label:"Цагийн баланс"},{key:"settings",label:"Тохиргоо"},{key:"report",label:"Тайлан"},{key:"about",label:"Системийн тухай"}]; }
+    selectTab(key) { this.state.section = key; }
+    openAction(xmlid) { return this.action.doAction(xmlid); }
 }
 registry.category("actions").add("hdc_attendance_management.dashboard", Dashboard);

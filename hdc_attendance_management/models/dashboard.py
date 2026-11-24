@@ -22,7 +22,13 @@ class AttendanceDashboard(models.Model):
             ('date_from', '<', datetime.combine(end, datetime.min.time()) - timedelta(hours=8)),
             ('date_to', '>', datetime.combine(start, datetime.min.time()) - timedelta(hours=8)),
         ])
-        rows = defaultdict(lambda: {'worked': 0, 'late': 0, 'early': 0, 'overtime': 0})
+        rows = defaultdict(lambda: {'worked': 0, 'late': 0, 'early': 0, 'overtime': 0, 'planned': 0})
+        # Provisional weekday baseline, matching the existing 480-minute rule.
+        # Excludes future dates; holidays and individual calendars are not yet applied.
+        days = sum((start + timedelta(days=i)).weekday() < 5
+                   for i in range(max(0, (min(end, today + timedelta(days=1)) - start).days)))
+        for employee in employees:
+            rows[employee.department_id.name or 'Нэгжгүй']['planned'] += days * 8
         for r in daily:
             row = rows[r.department_id.name or 'Нэгжгүй']
             for key, field in [('worked','worked_minutes'), ('late','late_minutes'), ('early','early_leave_minutes'), ('overtime','overtime_minutes')]:
