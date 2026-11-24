@@ -34,3 +34,11 @@ class AttendanceHoliday(models.Model):
                 result[day] = rec.name
                 day += timedelta(days=1)
         return result
+
+    @api.model
+    def seed_public_holidays(self, rows):
+        if not self.env.is_superuser():
+            raise ValidationError('Зөвхөн системийн шинэчлэлтээр ажиллуулна.')
+        for name, start, end in rows:
+            if not self.search_count([('date', '=', start)]):
+                self.create({'name': name, 'date': start, 'date_end': end})
