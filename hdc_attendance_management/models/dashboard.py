@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from odoo import api, models
+from dateutil.relativedelta import relativedelta
 from odoo.exceptions import AccessError
 
 class AttendanceDashboard(models.Model):
@@ -79,14 +80,14 @@ class AttendanceDashboard(models.Model):
             if r.status == 'absent' and r.attendance_date < today and r.attendance_date.weekday() < 5:
                 rows[r.department_id.name or 'Нэгжгүй']['absent'] += max(0, 8-hours(excused[(r.employee_id.id, r.attendance_date)]))
         return {'month': start.strftime('%Y-%m'), 'cards': [
-            ['Идэвхтэй ажилтан', len(employees)],
-            ['Ээлжийн амралттай /сонгосон сар/', len(requests.filtered(lambda r: r.request_type == 'annual_leave').mapped('employee_id'))],
-            ['Өвчтэй /сонгосон сар/', len(requests.filtered(lambda r: r.request_type == 'sick').mapped('employee_id'))],
-            ['Төхөөрөмжийн кодгүй ажилтан', len(employees.filtered(lambda e: not e.attendance_device_user_id))],
-            ['Ирсэн цаг бүртгэгдээгүй /өнөөдөр/', len(employees - recent.filtered(lambda r: r.attendance_date == today and r.actual_check_in).mapped('employee_id'))],
-            ['Орсон, гарсан цаг дутуу /өчигдөр/', len(recent.filtered(lambda r: r.attendance_date == yesterday and r.status == 'incomplete'))],
-            ['Хоцролттой /өчигдөр/', len(recent.filtered(lambda r: r.attendance_date == yesterday and r.late_minutes > 0))],
-            ['60 минутаас дээш нийт хоцролт /сар/', len([v for v in self._management_late_totals(daily).values() if v > 60])],
+            ['Шинэ ажилтан сүүлийн 1 сараар', len(employees.filtered(lambda e: e.create_date and today - relativedelta(months=1) <= (e.create_date + timedelta(hours=8)).date() <= today))],
+            ['Энэ сард ээлжийн амралттай байгаа ажилтан', len(requests.filtered(lambda r: r.request_type == 'annual_leave').mapped('employee_id'))],
+            ['Энэ сард ХАЧ болон Ж/Амралттай ажилтан', len(requests.filtered(lambda r: r.request_type == 'sick').mapped('employee_id'))],
+            ['Цагаа бүртгүүлдэггүй ажилтнууд', len(employees.filtered(lambda e: not e.attendance_device_user_id))],
+            ['Цагаа бүртгүүлээгүй ажилтан /өнөөдрөөр/', len(employees - recent.filtered(lambda r: r.attendance_date == today and r.actual_check_in).mapped('employee_id'))],
+            ['Орсон, гарсан цаг дутуу ажилтан /өчигдрөөр/', len(recent.filtered(lambda r: r.attendance_date == yesterday and r.status == 'incomplete'))],
+            ['Хоцролттой ажилтан /өчигдрөөр/', len(recent.filtered(lambda r: r.attendance_date == yesterday and r.late_minutes > 0))],
+            ['60 минутаас дээш хоцролттой байгаа ажилтан /сараар/', len([v for v in self._management_late_totals(daily).values() if v > 60])],
         ], 'rows': [{'name': k, **{f: round(v, 2) for f,v in row.items()}} for k,row in sorted(rows.items())]}
 
     def _management_late_totals(self, records):
