@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+<t t-name="hdc_attendance_management.Dashboard">
+<div class="o_action overflow-auto p-3 bg-light">
+<div class="d-flex justify-content-between align-items-center mb-3"><h3>Цаг бүртгэлийн удирдлага</h3><div><input type="month" t-att-value="state.month" t-on-change="changeMonth"/><button class="btn btn-secondary ms-2" t-on-click="() => this.load(state.month)">Шинэчлэх</button></div></div>
+<div class="row g-2 mb-3">
+<t t-foreach="state.cards" t-as="card" t-key="card_index"><div class="col-12 col-md-6 col-xl-3"><div class="p-3 rounded text-white d-flex justify-content-between align-items-center" t-att-style="'background:'+['#129fbc','#4bb2a7','#62aa78','#d87589','#d66a80','#9285dc','#ad842c','#d78949'][card_index]"><span t-esc="card[0]"/><strong class="fs-4" t-esc="card[1]"/></div></div></t>
+</div>
+<div class="row g-3">
+<div class="col-xl-6"><div class="card p-3"><h5>Цагийн шалтгаанаар /сараар/</h5><small>Хоцролт · Дутуу ажилласан · Илүү цаг (цаг)</small>
+<t t-foreach="state.rows" t-as="r" t-key="r.name"><div class="mt-2"><small t-esc="r.name"/><div class="d-flex" style="height:20px"><t t-foreach="['late','early','overtime']" t-as="k" t-key="k"><div t-att-title="k+': '+r[k]" t-att-style="'width:'+(100*r[k]/maxHours)+'%;background:'+({late:'#51bac6',early:'#ef9574',overtime:'#a56abe'}[k])"/></t></div><small t-esc="r.late+' / '+r.early+' / '+r.overtime"/></div></t>
+</div></div>
+<div class="col-xl-6"><div class="card p-3"><h5>Ажилласан цаг /салбар нэгжээр/</h5><t t-foreach="state.rows" t-as="r" t-key="r.name"><div class="mt-2"><small t-esc="r.name"/><div class="d-flex align-items-center gap-2"><div t-att-style="'height:20px;background:#51bac6;width:'+(100*r.worked/maxHours)+'%'"/><small t-esc="r.worked"/></div></div></t></div></div>
+</div><p class="text-muted mt-3">Эхний хувилбар: төхөөрөмжийн боловсруулсан ирц. Төлөвлөсөн цаг, зөвшөөрөгдсөн чөлөөгөөр засварласан баланс дараагийн шатанд нэмэгдэнэ.</p>
+</div>
+</t></templates>
